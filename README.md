@@ -3,7 +3,7 @@
 
 ## Tasks:
 * [x] App Shell / Styling
-* [ ] Screen Output
+* [x] Screen Output
 * [ ] Proper timing
 * [ ] Cancelling
 * [ ] Words Per Minute <-> Dot Time: [https://en.wikipedia.org/wiki/Morse_code#Speed_in_words_per_minute]
@@ -16,9 +16,7 @@
 		* [ ] Icons
 	* [ ] Persist settings in local storage
 	* [ ] Persist input in session storage
-* [ ] Audio Output
-	* [x] Gain Node instead of suspend / resume
-		* It didn't help with the "clicking" in the audio, unfortunately.
+* [x] Audio Output
 
 * [ ] Remember last message using session storage?
 

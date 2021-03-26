@@ -1,10 +1,15 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
 	<title>Morse Code Transmitter</title>
+	<meta name="description" content="A Morse Code transmitter.  Works offline for remote adventures.">
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<!-- TODO: If this were hosted on gihub pages, then the base would need to be adjusted to wherever the service worker is located. -->
+	<base href="/">
+
 	<link rel="stylesheet" href="style.css">
 
 	<script type="module" src="index.mjs"></script>
@@ -16,7 +21,10 @@
 	<main>
 		<h1>Morse Code App</h1>
 		<div class="section">
-			<textarea>Hello World</textarea>
+			<label>
+				Text to transmit:
+				<textarea>Hello World</textarea>
+			</label>
 			Code:
 			<code id="translated">.... . .-.. .-.. ---  .-- --- .-. .-.. -..</code>
 		</div>

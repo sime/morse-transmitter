@@ -146,5 +146,5 @@ details > div {
 	flex-grow: 0;
 }
 .transmit label span {
-	display: none;
+	/* display: none; */
 }
