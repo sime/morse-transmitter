@@ -7,12 +7,17 @@ import table from './morse-table.mjs';
 // Check if the browser knows about the 'torch' camera capability (Currently just Chrome and Opera)
 if ('mediaDevices' in navigator && navigator.mediaDevices.getSupportedConstraints()['torch']) {
 	// TODO: See if there's a way to turn on the torch using ImageCapture + fillLightMode
-	document.querySelector('input[value="torch"]').removeAttribute('disabled');
+	document.getElementById('torch-on').removeAttribute('disabled');
 }
 
 function input_value(el) {
 	const [getter, setter] = signal(el.value);
 	el.addEventListener('input', () => setter(el.value));
+	return getter;
+}
+function input_checked(el) {
+	const [getter, setter] = signal(el.checked);
+	el.addEventListener('click', () => setter(el.checked));
 	return getter;
 }
 function manual(func) {
@@ -22,22 +27,12 @@ function manual(func) {
 }
 
 export const plain_text = input_value(document.querySelector('textarea'));
-export const repeat = manual(setter => {
-	const repeat_el = document.getElementById('repeat');
-	function get_value() {
-		setter(repeat_el.checked);
-	}
-	repeat_el.addEventListener('click', get_value);
-	get_value();
-});
-export const mode = manual(setter => {
-	const mode = document.querySelector('.mode');
-	function get_value() {
-		setter(mode.querySelector('input:checked').value);
-	}
-	mode.addEventListener('input', get_value);
-	get_value();
-});
+
+export const repeat_on = input_checked(document.getElementById('repeat-on'));
+export const audio_on = input_checked(document.getElementById('audio-on'));
+export const flash_on = input_checked(document.getElementById('torch-on'));
+export const screen_on = input_checked(document.getElementById('screen-on'));
+
 export const dot_time = manual(setter => {
 	const dd_el = document.querySelector('input[name="dot-duration"]');
 	const wpm_el = document.querySelector('input[name="wpm"]');

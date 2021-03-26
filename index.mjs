@@ -1,6 +1,6 @@
 import { wrap_signal } from './lib/wrap-signal.mjs';
-import { encoded, repeat, dot_time } from './options.mjs';
-import { rename_me } from './modes.mjs';
+import { encoded, repeat_on, dot_time } from './options.mjs';
+import { init, on, off, close } from './modes.mjs';
 
 let abort = false;
 
@@ -27,35 +27,32 @@ async function transmit() {
 	const ot = dot_time();
 	const at = 3 * ot;
 
-	let on, off, close;
 	try {
-		[on, off, close] = await rename_me(abort);
+		await init();
 
-		// Wait for 1sec after going full screen before beginning transmission:
+		// Wait for 1sec before beginning transmission:
 		await wrap(delay(1000));
 
 		do {
 			for (const sym of code) {
 				if (sym == '.') {
-					on();
+					await on();
 					await wrap(delay(ot));
 				} else if (sym == '-') {
-					on();
+					await on();
 					await wrap(delay(at));
 				} else if (sym == ' ') {
-					off();
+					await off();
 					await wrap(delay(ot));
 				} else {
 					console.log("Can't transmit character: ", sym);
 				}
-				off();
+				await off();
 				await wrap(delay(ot));
 			}
-		} while (repeat());
+		} while (repeat_on());
 	} catch (e) { console.warn(e); } finally {
-		if (close) {
-			await close();
-		}
+		await close();
 		abort = false;
 	}
 }
