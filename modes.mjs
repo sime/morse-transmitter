@@ -1,4 +1,4 @@
-import { audio_on, flash_on, screen_on } from './options.mjs';
+import { audio_on, torch_on, screen_on } from './options.mjs';
 
 const flash = document.getElementById('screen-flash');
 let audio_context;
@@ -40,7 +40,7 @@ async function get_torches() {
 }
 
 export async function init() {
-	if (!screen_on() && !audio_on() && !flash_on()) {
+	if (!screen_on() && !audio_on() && !torch_on()) {
 		alert('Please select at least one transmit mode and then press transmit.');
 		throw new Error("No modes selected.");
 	}
@@ -55,16 +55,16 @@ export async function init() {
 		if (!audio_context) {
 			// Audio context should be created as part of a user interaction.
 			audio_context = new AudioContext();
-			if (audio_context.state == 'running') {
-				audio_context.suspend();
-			}
 			const synth = audio_context.createOscillator();
 			synth.connect(audio_context.destination);
 			synth.start();
+			if (audio_context.state == 'running') {
+				audio_context.suspend();
+			}
 		}
 		audio = audio_context;
 	}
-	if (flash_on()) {
+	if (torch_on()) {
 		torches = await get_torches();
 	}
 }

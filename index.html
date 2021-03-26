@@ -6,13 +6,15 @@
 	<meta name="description" content="A Morse Code transmitter.  Works offline for remote adventures.">
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="icon" href="icons/logo-small.svg" type="image/svg">
+	<meta name="theme-color" content="white">
 
 	<!-- TODO: If this were hosted on gihub pages, then the base would need to be adjusted to wherever the service worker is located. -->
 	<base href="/">
 
-	<link rel="stylesheet" href="style.css">
+	<link rel="manifest" href="manifest.json">
 
-	<script type="module" src="index.mjs"></script>
+	<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
@@ -22,11 +24,11 @@
 		<h1>Morse Code App</h1>
 		<div class="section">
 			<label>
-				Text to transmit:
+				<span class="for-screen-reader">Text to transmit:</span>
 				<textarea>Hello World</textarea>
 			</label>
 			Code:
-			<code id="translated">.... . .-.. .-.. ---  .-- --- .-. .-.. -..</code>
+			<code id="translated"></code>
 		</div>
 		<div class="mode section">
 			<label class="good-name">
@@ -61,7 +63,7 @@
 				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
 					<path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z" />
 				</svg>
-				<span>Repeat</span>
+				<span class="for-screen-reader">Repeat</span>
 			</label>
 			<button disabled>Transmit</button>
 		</div>
@@ -71,16 +73,37 @@
 				<div>
 					<label>
 						<span>Dot duration in milliseconds</span>
-						<input name="dot-duration" type="number" min="10" max="2000" value="100">
+						<input id="dot-duration" type="number" min="10" max="2000" value="100">
 					</label>
 					<label>
 						<span>Words per minute</span>
-						<input name="wpm" type="number" min="1" disabled>
+						<input id="wpm" type="number" min="1" disabled>
 					</label>
 				</div>
 			</details>
 		</div>
 	</main>
+	<script type="application/javascript">
+		// Get all the settings from local / session storage and apply the to the input elements so that the user can change them.  Then when our module runs and pulls the value from the input, it will show whatever the user has changed while loading.
+		const plain_text = sessionStorage.getItem('plain-text');
+		if (plain_text !== null) {
+			document.querySelector('textarea').innerText = plain_text;
+		}
+
+
+		for (const key of ['audio-on', 'torch-on', 'screen-on', 'repeat-on']) {
+			const stored = localStorage.getItem(key);
+			if (stored !== null) {
+				document.getElementById(key).checked = stored === 'true';
+			}
+		}
+
+		const dd = localStorage.getItem('dot-duration');
+		if (dd !== null) {
+			document.getElementById('dot-duration').value = new Number(dd);
+		}
+	</script>
+	<script type="module" src="index.mjs"></script>
 </body>
 
 </html>

@@ -42,6 +42,11 @@ textarea {
 .section {
 	margin: 1em 0;
 }
+.for-screen-reader {
+	position: absolute;
+	right: 100vw;
+	overflow: hidden;
+}
 
 /* Inputs */
 .good-name {
@@ -144,6 +149,8 @@ details > div {
 }
 .transmit .good-name {
 	flex-grow: 0;
+	grid:
+		"a" auto / auto;
 }
 .transmit label span {
 	/* display: none; */
