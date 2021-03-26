@@ -14,10 +14,14 @@
 	* [ ] Cache Assets
 	* [ ] App Manifest
 		* [ ] Icons
+	* [ ] Persist settings in local storage
+	* [ ] Persist input in session storage
 * [ ] Audio Output
-	* [ ] Gain Node instead of suspend / resume
+	* [x] Gain Node instead of suspend / resume
+		* It didn't help with the "clicking" in the audio, unfortunately.
 
 * [ ] Remember last message using session storage?
 
 ## Misc.
 * Would using the web animation be better for controlling blinks?  I don't think it would be.
+* Bundling / asset optimization

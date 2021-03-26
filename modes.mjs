@@ -49,16 +49,27 @@ export async function rename_me() {
 			});
 
 			for (const track of device_stream.getVideoTracks()) {
-				if ('torch' in track.getSettings()) {
+				// The last method I tried of checking if 'torch' was in the track's settings (which should be all settings supported and not just the settings we've set) didn't work.
+				// New attempt is to just apply the constraint and if the torch constraint isn't supported then we'll get a DOMException saying so.
+				try {
+					await track.applyConstraints({ advanced: [{ torch: false }] });
 					torches.push(track);
+				} catch (e) {
+					if (!(e instanceof DOMException)) {
+						// Only catch DOMExceptions
+						throw e;
+					}
+					track.stop();
 				}
 			}
 		}
-		alert("No camera with a suitable flash found.  Transmission cancelled.");
-		if (torches.length < 1) throw new Error('No Available Torch');
+		if (torches.length < 1) {
+			alert("No camera with a suitable flash found.  Transmission cancelled.");
+			throw new Error('No Available Torch');
+		}
 		return [
-			() => torches.forEach(t => t.applyConstraints({ torch: true })),
-			() => torches.forEach(t => t.applyConstraints({ torch: false })),
+			() => torches.forEach(t => t.applyConstraints({ advanced: [{ torch: true }] })),
+			() => torches.forEach(t => t.applyConstraints({ advanced: [{ torch: false }] })),
 			() => torches.forEach(t => t.stop())
 		];
 	}
