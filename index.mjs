@@ -11,6 +11,12 @@ function delay(ms = 100) {
 const flash = document.getElementById('screen-flash');
 flash.addEventListener('click', () => {
 	if (flash == document.fullscreenElement) {
+		document.exitFullscreen();
+	}
+});
+// This makes it so that even if the user exits full screen by not clicking flash (like pressing escape) the transmission will still be aborted.
+flash.addEventListener('fullscreenchange', () => {
+	if (flash !== document.fullscreenElement && abort) {
 		abort.abort();
 	}
 });
@@ -20,11 +26,11 @@ async function transmit() {
 	const code = encoded();
 	const ot = dot_time();
 	const at = 3 * ot;
-	const [init, on, off, close] = rename_me();
 
-	await init();
-
+	let on, off, close;
 	try {
+		[on, off, close] = await rename_me(abort);
+
 		// Wait for 1sec after going full screen before beginning transmission:
 		await wrap(delay(1000));
 
@@ -46,8 +52,10 @@ async function transmit() {
 				await wrap(delay(ot));
 			}
 		} while (repeat());
-	} catch (e) { } finally {
-		close();
+	} catch (e) { console.warn(e); } finally {
+		if (close) {
+			await close();
+		}
 		abort = false;
 	}
 }

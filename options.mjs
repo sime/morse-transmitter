@@ -4,6 +4,12 @@
 import { context, computed, signal } from './lib/index.mjs';
 import table from './morse-table.mjs';
 
+// Check if the browser knows about the 'torch' camera capability (Currently just Chrome and Opera)
+if ('mediaDevices' in navigator && navigator.mediaDevices.getSupportedConstraints()['torch']) {
+	// TODO: See if there's a way to turn on the torch using ImageCapture + fillLightMode
+	document.querySelector('input[value="torch"]').removeAttribute('disabled');
+}
+
 function input_value(el) {
 	const [getter, setter] = signal(el.value);
 	el.addEventListener('input', () => setter(el.value));

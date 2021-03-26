@@ -20,7 +20,7 @@ main {
 h1 {
 	text-align: center;
 }
-textarea, input {
+textarea, input, button {
 	background-color: unset;
 	color: unset;
 	border: 1px solid currentColor;
@@ -68,6 +68,7 @@ textarea {
 	max-width: 90px;
 	fill: currentColor;
 	grid-area: a;
+	justify-self: center;
 }
 .good-name input:checked {
 	background-color: var(--foreground-color);
@@ -82,9 +83,6 @@ textarea {
 	margin: 0.3em;
 }
 button {
-	background: unset;
-	border: 1px solid currentColor;
-	color: currentColor;
 	padding: 1em 2em;
 }
 :disabled {
@@ -96,12 +94,20 @@ button {
 		var(--background-color) 6px
 	);
 }
+:disabled + svg {
+	color: orange;
+}
 
 /* Mode Section */
 .mode {
 	display: flex;
 	justify-content: space-between;
 	align-items: stretch;
+}
+@media (max-width: 300px) {
+	.mode {
+		flex-direction: column;
+	}
 }
 .mode label {
 	flex-grow: 1;
@@ -125,6 +131,7 @@ details > div {
 .settings label {
 	display: flex;
 	justify-content: space-between;
+	margin: .5em 0;
 }
 .settings input[type="number"] {
 	width: calc(4ch + 2em);
@@ -134,6 +141,9 @@ details > div {
 .transmit {
 	justify-content: center;
 	display: flex;
+}
+.transmit .good-name {
+	flex-grow: 0;
 }
 .transmit label span {
 	display: none;
