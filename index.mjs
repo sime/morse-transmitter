@@ -1,12 +1,8 @@
-import { wrap_signal } from './lib/wrap-signal.mjs';
 import { encoded, repeat_on, dot_time } from './options.mjs';
 import { init, on, off, close } from './modes.mjs';
+import TransmitCancel from './cancel.mjs';
 
 let abort = false;
-
-function delay(ms = 100) {
-	return new Promise(resolve => setTimeout(resolve, ms));
-};
 
 const flash = document.getElementById('screen-flash');
 flash.addEventListener('click', () => {
@@ -22,36 +18,58 @@ flash.addEventListener('fullscreenchange', () => {
 });
 
 async function transmit() {
-	const wrap = wrap_signal(abort.signal);
 	const code = encoded();
 	const ot = dot_time();
 	const at = 3 * ot;
+
+	// The transmission can only be cancelled during a delay.
+	function delay(ms = 100) {
+		const start = document.timeline.currentTime || performance.now();
+		return new Promise((resolve, reject) => {
+			function cancel() {
+				clearTimeout(id);
+				reject(new TransmitCancel('Abort Signal'))
+			}
+			function cont() {
+				resolve();
+				abort.signal.removeEventListener('abort', cancel);
+			}
+			const t = Math.max(0, Math.round(start + ms - performance.now()));
+			const id = setTimeout(cont, t);
+			abort.signal.addEventListener('abort', cancel);
+		});
+	}
 
 	try {
 		await init();
 
 		// Wait for 1sec before beginning transmission:
-		await wrap(delay(1000));
+		await delay(1000);
 
 		do {
 			for (const sym of code) {
 				if (sym == '.') {
 					await on();
-					await wrap(delay(ot));
+					await delay(ot);
 				} else if (sym == '-') {
 					await on();
-					await wrap(delay(at));
+					await delay(at);
 				} else if (sym == ' ') {
 					await off();
-					await wrap(delay(ot));
+					await delay(ot);
 				} else {
 					console.log("Can't transmit character: ", sym);
 				}
 				await off();
-				await wrap(delay(ot));
+				await delay(ot);
 			}
 		} while (repeat_on());
-	} catch (e) { console.warn(e); } finally {
+	} catch (e) {
+		// Only catch transmission cancel errors.
+		if (!(e instanceof TransmitCancel)) {
+			throw e;
+		}
+	} finally {
 		await close();
 		abort = false;
 	}

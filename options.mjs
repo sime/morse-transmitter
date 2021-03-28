@@ -37,13 +37,13 @@ export const dot_time = manual(setter => {
 	const dd_el = document.getElementById('dot-duration');
 	const wpm_el = document.getElementById('wpm');
 	function dd_input() {
-		setter(dd_el.value);
+		setter(Number.parseInt(dd_el.value));
 
 		wpm_el.value = 1200 / dd_el.value;
 	}
 	dd_el.addEventListener('input', dd_input);
 	wpm_el.addEventListener('input', () => {
-		setter(1200 / wpm_el.value);
+		setter(1200 / Number.parseInt(wpm_el.value));
 
 		dd_el.value = 1200 / wpm_el.value;
 	});

@@ -5,7 +5,7 @@
 * [x] App Shell / Styling
 * [x] Screen Output
 * [ ] Proper timing
-* [ ] Cancelling
+* [ ] Cancelling + No uncaught exceptions
 * [x] Words Per Minute <-> Dot Time: [https://en.wikipedia.org/wiki/Morse_code#Speed_in_words_per_minute]
 * [ ] Torch Output
 	* [https://stackoverflow.com/questions/37848494/is-it-possible-to-control-the-camera-light-on-a-phone-via-a-website]

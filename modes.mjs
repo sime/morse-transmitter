@@ -1,4 +1,5 @@
 import { audio_on, torch_on, screen_on } from './options.mjs';
+import TransmitCancel from './cancel.mjs';
 
 const flash = document.getElementById('screen-flash');
 let audio_context;
@@ -34,7 +35,7 @@ async function get_torches() {
 	}
 	if (torches.length < 1) {
 		alert("No camera with a suitable flash found.  Transmission cancelled.");
-		throw new Error('No Available Torch');
+		throw new TransmitCancel('No Available Torch');
 	}
 	return torches;
 }
@@ -42,7 +43,7 @@ async function get_torches() {
 export async function init() {
 	if (!screen_on() && !audio_on() && !torch_on()) {
 		alert('Please select at least one transmit mode and then press transmit.');
-		throw new Error("No modes selected.");
+		throw new TransmitCancel("No modes selected.");
 	}
 	if (screen_on()) {
 		flash_style = flash.style;
