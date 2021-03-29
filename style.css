@@ -11,6 +11,9 @@ html {
 		color: white;
 	}
 }
+.blinking main {
+	display: none;
+}
 main {
 	font-size: 16px;
 	z-index: 2;
@@ -62,6 +65,10 @@ textarea {
 .good-name input {
 	display: block;
 	appearance: none;
+	-webkit-appearance: none;
+	width: unset;
+	height: unset;
+	border-radius: unset;
 	grid-area: a;
 	border: 1px solid currentColor;
 	margin: 0;

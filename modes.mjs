@@ -48,14 +48,16 @@ export async function init() {
 	if (screen_on()) {
 		flash_style = flash.style;
 		flash_style.backgroundColor = 'black';
+		document.body.classList.add('blinking');
 		if (document.fullscreenElement !== flash) {
-			await flash.requestFullscreen();
+			const rfs = flash.requestFullscreen || flash.webkitRequestFullscreen;
+			if (rfs) await rfs();
 		}
 	}
 	if (audio_on()) {
 		if (!audio_context) {
 			// Audio context should be created as part of a user interaction.
-			audio_context = new AudioContext();
+			audio_context = new (window.AudioContext || window.webkitAudioContext)();
 			const synth = audio_context.createOscillator();
 			synth.connect(audio_context.destination);
 			synth.start();
@@ -98,6 +100,7 @@ export async function off() {
 }
 export async function close() {
 	flash.style.backgroundColor = '';
+	document.body.classList.remove('blinking');
 	if (document.fullscreenElement == flash) {
 		await document.exitFullscreen();
 	}

@@ -19,7 +19,8 @@ let abort = false;
 
 const flash = document.getElementById('screen-flash');
 flash.addEventListener('click', () => {
-	if (flash == document.fullscreenElement) {
+	if (document.body.classList.contains('blinking')) {
+		if (abort) abort.abort();
 		document.exitFullscreen();
 	}
 });
@@ -106,3 +107,7 @@ if ('serviceWorker' in navigator) {
 		navigator.serviceWorker.register('/service-worker.js');
 	});
 }
+
+window.addEventListener('unhandledrejection', e => {
+	document.body.insertAdjacentText('beforeend', e.reason);
+})
