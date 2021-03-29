@@ -50,8 +50,11 @@ export async function init() {
 		flash_style.backgroundColor = 'black';
 		document.body.classList.add('blinking');
 		if (document.fullscreenElement !== flash) {
-			const rfs = flash.requestFullscreen || flash.webkitRequestFullscreen;
-			if (rfs) await rfs();
+			if ('requestFullscreen' in flash) {
+				await flash.requestFullscreen();
+			} else if ('webkitRequestFullscreen' in flash) {
+				await flash.webkitRequestFullscreen();
+			}
 		}
 	}
 	if (audio_on()) {

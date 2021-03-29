@@ -8,11 +8,11 @@ window.addEventListener('beforeinstallprompt', e => {
 
 	const btn = document.querySelector('.install button');
 	btn.addEventListener('click', () => {
-		e.prompt();
+		e.prompt().finally(() => e.style.display = 'none');
 	});
 
 	btn.style.display = '';
-});
+}, { once: true });
 
 // Handle transmission:
 let abort = false;
@@ -107,7 +107,3 @@ if ('serviceWorker' in navigator) {
 		navigator.serviceWorker.register('/service-worker.js');
 	});
 }
-
-window.addEventListener('unhandledrejection', e => {
-	document.body.insertAdjacentText('beforeend', e.reason);
-})
