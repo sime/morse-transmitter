@@ -2,6 +2,19 @@ import { encoded, repeat_on, dot_time } from './options.mjs';
 import { init, on, off, close } from './modes.mjs';
 import TransmitCancel from './cancel.mjs';
 
+// Customize install:
+window.addEventListener('beforeinstallprompt', e => {
+	e.preventDefault();
+
+	const btn = document.querySelector('.install button');
+	btn.addEventListener('click', () => {
+		e.prompt();
+	});
+
+	btn.style.display = '';
+});
+
+// Handle transmission:
 let abort = false;
 
 const flash = document.getElementById('screen-flash');
