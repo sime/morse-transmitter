@@ -11,7 +11,7 @@ self.addEventListener('install', e => e.waitUntil((async () => {
 		'/',
 		'index.html',
 
-		'manifest.json',
+		'app.webmanifest',
 		'icons/logo-small.svg', // Needed for the page icon.
 
 		'style.css',
