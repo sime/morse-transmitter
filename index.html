@@ -24,7 +24,7 @@
 			<h1>Morse Code App</h1>
 			<section id="message">
 				<label>
-					<span class="for-screen-reader">Text to transmit:</span>
+					<span class="for-screen-reader">Message to transmit</span>
 					<textarea>Hello World</textarea>
 				</label>
 			</section>
@@ -38,53 +38,61 @@
 			</section>
 			<section id="settings">
 				<div id="output-modes">
-					<label class="card">
+					<div class="card">
 						<input type="checkbox" id="audio-on" checked>
-						<svg width="22" height="18" viewBox="0 0 22 18" xmlns="http://www.w3.org/2000/svg">
-							<path d="M10 2L5 6H1V12H5L10 16V2Z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-							<path d="M18.07 1.93005C19.9447 3.80533 20.9979 6.34841 20.9979 9.00005C20.9979 11.6517 19.9447 14.1948 18.07 16.0701M14.54 5.46005C15.4774 6.39769 16.004 7.66923 16.004 8.99505C16.004 10.3209 15.4774 11.5924 14.54 12.5301" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-						</svg>
-						<span>Audio</span>
-					</label>
-					<label class="card">
+						<label for="audio-on">
+							<svg width="22" height="18" viewBox="0 0 22 18" xmlns="http://www.w3.org/2000/svg">
+								<path d="M10 2L5 6H1V12H5L10 16V2Z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+								<path d="M18.07 1.93005C19.9447 3.80533 20.9979 6.34841 20.9979 9.00005C20.9979 11.6517 19.9447 14.1948 18.07 16.0701M14.54 5.46005C15.4774 6.39769 16.004 7.66923 16.004 8.99505C16.004 10.3209 15.4774 11.5924 14.54 12.5301" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+							</svg>
+							<span>Audio</span>
+						</label>
+					</div>
+					<div class="card">
 						<input type="checkbox" id="torch-on" disabled>
-						<svg width="26" height="28" viewBox="0 0 26 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-							<path d="M14.3333 1L1 16.6H13L11.6667 27L25 11.4H13L14.3333 1Z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-						</svg>
-
-						<span>Flash</span>
-					</label>
-					<label class="card">
+						<label for="torch-on">
+							<svg width="26" height="28" viewBox="0 0 26 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+								<path d="M14.3333 1L1 16.6H13L11.6667 27L25 11.4H13L14.3333 1Z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+							</svg>
+							<span>Flash</span>
+						</label>
+					</div>
+					<div class="card">
 						<input type="checkbox" id="screen-on" checked>
-						<svg width="18" height="25" viewBox="0 0 18 25" xmlns="http://www.w3.org/2000/svg">
-							<path fill-rule="evenodd" d="M14.5 1H3.25C2.00736 1 1 2.00736 1 3.25V21.25C1 22.4926 2.00736 23.5 3.25 23.5H14.5C15.7426 23.5 16.75 22.4926 16.75 21.25V3.25C16.75 2.00736 15.7426 1 14.5 1Z M9.375 7.75L9.375 7.75L8.87 11.75H13.375L8.375 17.75L8.875 13.75H4.375Z" stroke="none" />
-							<path d="M14.5 1H3.25C2.00736 1 1 2.00736 1 3.25V21.25C1 22.4926 2.00736 23.5 3.25 23.5H14.5C15.7426 23.5 16.75 22.4926 16.75 21.25V3.25C16.75 2.00736 15.7426 1 14.5 1Z" fill="none" stroke-width="2" />
-							<!--<path stroke="none" fill="lime" d="M9.375 7.75L9.375 7.75L8.87 11.75H13.375L8.375 17.75L8.875 13.75H4.375Z" /> -->
-							<path stroke="none" fill="var(--lightning-color)" d="M9.375 7.75L4.375 13.75H8.875L8.375 17.75L13.375 11.75H8.875L9.375 7.75Z" />
-						</svg>
-
-						<span>Screen Flash</span>
-					</label>
+						<label for="screen-on">
+							<svg width="18" height="25" viewBox="0 0 18 25" xmlns="http://www.w3.org/2000/svg">
+								<path fill-rule="evenodd" d="M14.5 1H3.25C2.00736 1 1 2.00736 1 3.25V21.25C1 22.4926 2.00736 23.5 3.25 23.5H14.5C15.7426 23.5 16.75 22.4926 16.75 21.25V3.25C16.75 2.00736 15.7426 1 14.5 1Z M9.375 7.75L9.375 7.75L8.87 11.75H13.375L8.375 17.75L8.875 13.75H4.375Z" stroke="none" />
+								<path d="M14.5 1H3.25C2.00736 1 1 2.00736 1 3.25V21.25C1 22.4926 2.00736 23.5 3.25 23.5H14.5C15.7426 23.5 16.75 22.4926 16.75 21.25V3.25C16.75 2.00736 15.7426 1 14.5 1Z" fill="none" stroke-width="2" />
+								<!--<path stroke="none" fill="lime" d="M9.375 7.75L9.375 7.75L8.87 11.75H13.375L8.375 17.75L8.875 13.75H4.375Z" /> -->
+								<path stroke="none" fill="var(--lightning-color)" d="M9.375 7.75L4.375 13.75H8.875L8.375 17.75L13.375 11.75H8.875L9.375 7.75Z" />
+							</svg>
+							<span>Screen Flash</span>
+						</label>
+					</div>
 				</div>
 				<div class="transmit">
-					<label>
-						<input id="repeat-on" type="checkbox">
-						<svg width="22px" height="22px" viewBox="0 0 22 22" stroke="currentcolor" fill="none" xmlns="http://www.w3.org/2000/svg">
-							<g clip-path="url(#clip0)">
-								<path d="M15.5833 0.916626L19.2499 4.58329L15.5833 8.24996" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-								<path d="M2.75 10.0834V8.25004C2.75 7.27758 3.13631 6.34495 3.82394 5.65732C4.51158 4.96968 5.44421 4.58337 6.41667 4.58337H19.25" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-								<path d="M6.41667 21.0833L2.75 17.4167L6.41667 13.75" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-								<path d="M19.25 11.9166V13.75C19.25 14.7224 18.8637 15.6551 18.1761 16.3427C17.4884 17.0303 16.5558 17.4166 15.5833 17.4166H2.75" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-							</g>
-							<defs>
-								<clipPath id="clip0">
-									<rect width="22" height="22" fill="white" />
-								</clipPath>
-							</defs>
-						</svg>
+					<div>
 
-						<span class="for-screen-reader">Repeat</span>
-					</label>
+						<input id="repeat-on" type="checkbox">
+						<label for="repeat-on">
+							<svg stroke="currentcolor" width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+								<rect stroke="none" width="60" height="60" rx="29" />
+								<g clip-path="url(#clip0)" fill="none">
+									<path d="M34.5833 19.9166L38.2499 23.5833L34.5833 27.25" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+									<path d="M21.75 29.0834V27.25C21.75 26.2776 22.1363 25.3449 22.8239 24.6573C23.5116 23.9697 24.4442 23.5834 25.4167 23.5834H38.25" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+									<path d="M25.4167 40.0833L21.75 36.4167L25.4167 32.75" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+									<path d="M38.25 30.9166V32.75C38.25 33.7224 37.8637 34.6551 37.1761 35.3427C36.4884 36.0303 35.5558 36.4166 34.5833 36.4166H21.75" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+								</g>
+								<defs>
+									<clipPath id="clip0">
+										<rect width="22" height="22" fill="white" transform="translate(19 19)" />
+									</clipPath>
+								</defs>
+							</svg>
+
+							<span class="for-screen-reader">Repeat</span>
+						</label>
+					</div>
 					<button disabled>Transmit</button>
 				</div>
 				<div class="section settings">
@@ -122,7 +130,7 @@
 							<path d="M9 5.35132V12.6486" />
 							<path d="M12.6487 9L5.35138 9" />
 						</svg>
-						Add app to homescreen
+						Add App to Homescreen
 					</button>
 				</div>
 			</section>

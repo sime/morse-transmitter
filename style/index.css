@@ -13,20 +13,6 @@ html {
 body {
 	margin: 0;
 }
-
-/* General */
-/* html {
-	--foreground-color: black;
-	--background-color: white;
-}
-@media (prefers-color-scheme: dark) {
-	html {
-		background-color: black;
-		--background-color: black;
-		--foreground-color: white;
-		color: white;
-	}
-} */
 .blinking main {
 	display: none;
 }
@@ -48,6 +34,7 @@ h1 {
 h2 {
 	font-size: 16px;
 }
+
 section {
 	background-color: #2d2d2d;
 	padding: 14px;
@@ -60,6 +47,19 @@ section > div {
 	align-items: stretch;
 	margin: 1em 0;
 }
+section > div:first-child {
+	margin-top: unset;
+}
+
+/* Put a little space between the horizontal items */
+section > div > * {
+	margin-left: 10px;
+}
+section > div > *:first-child {
+	margin-left: unset;
+}
+
+
 section#encoded div {
 	color: var(--accent-color);
 	font-weight: bold;
@@ -72,6 +72,7 @@ section#settings {
 	padding: 30px;
 }
 
+/* Style the advanced settings */
 details[open] summary {
 	color: var(--accent-color);
 }
@@ -81,96 +82,92 @@ summary {
 }
 
 /* The cards that specify the output modes */
-label.card {
+.card {
+	flex: 1 1 0;
+}
+.card label {
+	background-color: #464646;
+
 	font-size: 12px;
 	display: flex;
 	justify-content: flex-end;
-	flex: 1 1 0;
 	padding: 15px;
-	margin-left: 10px;
 	border-radius: 10px;
 	flex-direction: column;
-	position: relative;
 	aspect-ratio: 0.98;
 	max-width: 200px;
 }
-label.card > * {
-	z-index: 1;
+.card label::after {
+	content: "Off";
+	color: #A0A0A0;
+
+	font-weight: bold;
 }
-label.card:first-of-type {
-	margin-left: unset;
-}
-label.card input {
-	appearance: none;
-	/* display: contents; */
-	/* -webkit-appearance: none; */
-	order: 1;
-}
-/* The checkbox's ::before element is used as the background of the card. */
-label.card input::before {
-	display: block;
-	content: "";
-	position: absolute;
-	width: 100%;
-	left: 0;
-	top: 0;
-	height: 100%;
-	border-radius: 10px;
-	background-color: #464646;
-	z-index: -1;
-}
-label.card input:checked::before {
+
+.card input:checked + label {
 	background-color: #5C5C5C;
 }
-label.card input:disabled::before {
-	background-color: #363636;
-}
-/* The checkbox's ::after element is used to add the On/Off/Disabled text. */
-label.card input::after {
-	z-index: 4;
-	color: #A0A0A0;
-	content: "Off";
-}
-label.card input:checked::after {
-	display: block;
+.card input:checked + label::after {
 	content: "On";
 	color: var(--accent-color);
 }
-label.card input:disabled::after {
+
+.card input:disabled + label {
+	background-color: #363636;
+}
+.card input:disabled + label::after {
 	content: "Disabled";
 	color: #5F5F5F;
 }
 
 /* Style the icons.  (--lightning color is just for the screen flash icon.) */
-label.card svg {
+.card label svg {
 	stroke: #A0A0A0;
 	flex-grow: 1;
 	--lightning-color: #A0A0A0;
 	fill: none;
 }
-label.card input:checked + svg {
+.card input:checked + label svg {
 	fill: var(--accent-color);
 	stroke: var(--accent-color);
 	--lightning-color: none;
 }
-label.card input:disabled + svg {
+.card input:disabled + label svg {
 	stroke: #5F5F5F;
 	--lightning-color: #5F5F5F;
 }
 
 /* Style the label span */
-label.card input:disabled + svg + span {
+.card input:disabled + label span {
 	color: #5F5F5F;
 }
-label.card span {
+.card span {
 	font-weight: bold;
 }
 
+/* Style focus (Our input[type="checkbox"] is 0 width and 0 height so it's focus styles are not visible to a keyboard user. That's ok though, because we want the label to look like it has the focus anyway.) */
+:focus-visible, :focus-visible + label {
+	outline: 1px solid #FFED79;
+	outline-offset: 2px;
+}
+
+/* Style inputs */
 textarea, input, button {
+	appearance: none;
 	color: unset;
+	vertical-align: middle;
 	border: unset;
 	background-color: unset;
 	font-size: inherit;
+}
+input[type="checkbox"] {
+	position: absolute;
+	margin: 0;
+	width: 0;
+	height: 0;
+}
+input:focus-visible {
+	outline: 0;	
 }
 textarea {
 	width: 100%;
@@ -197,9 +194,6 @@ textarea {
 
 /* Style the transmit and repeat section */
 .transmit button {
-	margin-left: 10px;
-}
-.transmit button {
 	font-size: 20px;
 	flex-grow: 1;
 	color: #141414;
@@ -213,36 +207,12 @@ textarea {
 .transmit button:active {
 	background-color: #F5DF4D;
 }
-.transmit label {
-	width: 60px;
-	/* text-align: center; */
-	display: grid;
-	grid-template:
-		"a" /1fr;
+.transmit svg {
+	fill: #464646;
 }
-.transmit label svg {
-	/* box-sizing: border-box; */
-	grid-area: a;
-	/* padding: 10px; */
-}
-.transmit input {
-	/* display: none; */
-	grid-area: a;
-	/* border: none; */
-	/* position: absolute; */
-	appearance: none;
-	/* width: 100%; */
-	/* height: 100%; */
-	/* left: 0; */
-	/* top: 0; */
-	border-radius: 50%;
-	background-color: #464646;
-}
-.transmit input:checked {
-	background-color: var(--accent-color);
-}
-.transmit input:checked + svg {
-	color: #464646;
+.transmit input:checked + label svg {
+	fill: var(--accent-color);
+	stroke: black;
 }
 
 /* Input / Code Section */
