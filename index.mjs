@@ -6,7 +6,7 @@ import TransmitCancel from './cancel.mjs';
 window.addEventListener('beforeinstallprompt', e => {
 	e.preventDefault();
 
-	const btn = document.querySelector('.install button');
+	const btn = document.querySelector('#install button');
 	btn.addEventListener('click', () => {
 		e.prompt().finally(() => e.style.display = 'none');
 	});

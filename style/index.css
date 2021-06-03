@@ -17,16 +17,25 @@ body {
 	display: none;
 }
 main {
+	width: 100vw;
+	height: 100vh;
+	/* overflow: hidden; */
+	display: grid;
+	grid-template:
+		"title" min-content
+		"message" min-content
+		"code" min-content
+		"settings" 1fr
+		"install" min-content / 1fr;
 	font-size: 16px;
 	z-index: 2;
-	/* margin: 2em auto; */
-	/* max-width: 50ch; */
 }
 h1, h2, h3 {
 	color: var(--accent-color);
 	margin: 0;
 }
 h1 {
+	grid-area: title;
 	margin-top: 35px;
 	text-align: center;
 	font-size: 25px;
@@ -35,12 +44,39 @@ h2 {
 	font-size: 16px;
 }
 
+/* Style the sections */
 section {
 	background-color: #2d2d2d;
 	padding: 14px;
-	margin: 15px;
 	border-radius: 10px;
 }
+
+/* Style the individual sections */
+section#message {
+	grid-area: message;
+}
+section#message, section#encoded {
+	margin: 15px 15px 0 15px;
+}
+section#encoded div {
+	grid-area: code;
+	color: var(--accent-color);
+	font-weight: bold;
+}
+section#settings {
+	grid-area: settings;
+	bottom: 0;
+	margin-top: 14px;
+	border-radius: 20px 20px 0 0;
+	padding: 30px;
+}
+section#install {
+	grid-area: install;
+	border-radius: none;
+	text-align: center;
+}
+
+/* Within the sections are horizontal flexible divs */
 section > div {
 	display: flex;
 	justify-content: space-around;
@@ -50,26 +86,12 @@ section > div {
 section > div:first-child {
 	margin-top: unset;
 }
-
 /* Put a little space between the horizontal items */
 section > div > * {
 	margin-left: 10px;
 }
 section > div > *:first-child {
 	margin-left: unset;
-}
-
-
-section#encoded div {
-	color: var(--accent-color);
-	font-weight: bold;
-}
-section#settings {
-	/* position: sticky; */
-	bottom: 0;
-	margin: 14px 0;
-	border-radius: 20px 20px 0 0;
-	padding: 30px;
 }
 
 /* Style the advanced settings */
@@ -86,16 +108,18 @@ summary {
 	flex: 1 1 0;
 }
 .card label {
+	width:  100%;
+	height: 100%;
+	box-sizing:  border-box;
 	background-color: #464646;
-
 	font-size: 12px;
 	display: flex;
 	justify-content: flex-end;
 	padding: 15px;
 	border-radius: 10px;
 	flex-direction: column;
-	aspect-ratio: 0.98;
-	max-width: 200px;
+	/* aspect-ratio: 0.98; */
+	/* max-width: 200px; */
 }
 .card label::after {
 	content: "Off";
