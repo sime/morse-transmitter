@@ -17,13 +17,16 @@ body {
 	display: none;
 }
 main {
+	box-sizing: border-box;
 	width: 100vw;
+	max-width: 1500px;
+	margin: 0 auto;
 	height: 100vh;
 	/* overflow: hidden; */
 	display: grid;
 	grid-template:
 		"title" min-content
-		"message" min-content
+		"message" max-content
 		"code" min-content
 		"settings" 1fr
 		"install" min-content / 1fr;
@@ -71,6 +74,7 @@ section#settings {
 	padding: 30px;
 }
 section#install {
+	color: var(--accent-color);
 	grid-area: install;
 	border-radius: none;
 	text-align: center;
@@ -79,7 +83,7 @@ section#install {
 /* Within the sections are horizontal flexible divs */
 section > div {
 	display: flex;
-	justify-content: space-around;
+	justify-content: stretch;
 	align-items: stretch;
 	margin: 1em 0;
 }
@@ -177,7 +181,7 @@ summary {
 
 /* Style inputs */
 textarea, input, button {
-	appearance: none;
+	resize: none;
 	color: unset;
 	vertical-align: middle;
 	border: unset;
@@ -185,19 +189,28 @@ textarea, input, button {
 	font-size: inherit;
 }
 input[type="checkbox"] {
+	appearance: none;
 	position: absolute;
 	margin: 0;
 	width: 0;
 	height: 0;
+}
+input[type="number"] {
+	background-color: #141414;
+	border-radius: 15px;
+	padding: 0 15px;
 }
 input:focus-visible {
 	outline: 0;	
 }
 textarea {
 	width: 100%;
+	height: 100%;
 	font-family: inherit;
 	max-width: 100%;
 	min-width: 100%;
+	max-height: 100%;
+	min-height: 100%;
 }
 #screen-flash {
 	z-index: -1;
@@ -217,6 +230,9 @@ textarea {
 }
 
 /* Style the transmit and repeat section */
+.transmit {
+	align-items: center;
+}
 .transmit button {
 	font-size: 20px;
 	flex-grow: 1;
@@ -246,21 +262,45 @@ textarea {
 	word-break: break-word;
 }
 
-.settings label {
+#settings label {
 	display: flex;
 	justify-content: space-between;
 	margin: .5em 0;
 }
-.settings input[type="number"] {
+#settings input[type="number"] {
 	width: calc(4ch + 2em);
 }
 
 /* Install PWA Section */
-.install {
-	text-align: center;
-}
 @media (display-mode: standalone) {
-	.install {
+	#install {
 		display: none;
+	}
+}
+
+/* Tablet / desktop styleing */
+@media(min-width: 850px) {
+	main {
+		grid-template: 
+		"title title" min-content
+		"message settings" 1fr
+		"code settings" min-content
+		"install install" min-content / 1fr 1fr;
+		padding: 60px;
+	}
+	h1 {
+		font-size: 31px;
+		margin-top: 11px;
+	}
+	section#message, section#encoded, section#settings {
+		margin: 20px;
+		border-radius: 10px;
+	}
+	#install {
+		font-size: 25px;
+		background-color: unset;
+	}
+	#settings {
+		border-radius: unset;
 	}
 }
