@@ -36,6 +36,19 @@ export const screen_on = input_checked(document.getElementById('screen-on'));
 export const dot_time = manual(setter => {
 	const dd_el = document.getElementById('dot-duration');
 	const wpm_el = document.getElementById('wpm');
+
+	// Setup the little buttons before / after the input[type="number"] elements
+	for (const num_el of [dd_el, wpm_el]) {
+		num_el.previousElementSibling.addEventListener('click', () => {
+			num_el.value = Number.parseInt(num_el.value) - 1;
+			num_el.dispatchEvent(new Event('input', { bubbles: true }));
+		});
+		num_el.nextElementSibling.addEventListener('click', () => {
+			num_el.value = Number.parseInt(num_el.value) + 1;
+			num_el.dispatchEvent(new Event('input', { bubbles: true }));
+		});
+	}
+
 	function dd_input() {
 		setter(Number.parseInt(dd_el.value));
 

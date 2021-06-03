@@ -110,15 +110,25 @@
 						</svg>
 						Advanced Settings
 					</summary>
-					<div>
-						<label>
-							<span>Dot duration in milliseconds</span>
+					<label>
+						<div>
+							<div>Dot Duration</div>
+							<small>in milliseconds</small>
+						</div>
+						<div>
+							<button role="presentation" tabindex="-1">-</button>
 							<input id="dot-duration" type="number" min="10" max="2000" value="100">
-						</label>
-						<label>
-							<span>Words per minute</span>
+							<button role="presentation" tabindex="-1">+</button>
+						</div>
+					</label>
+					<label>
+						<span>Words per minute</span>
+						<div>
+							<button role="presentation" tabindex="-1">-</button>
 							<input id="wpm" type="number" min="1" disabled>
-						</label>
+							<button role="presentation" tabindex="-1">+</button>
+						</div>
+					</label>
 					</div>
 				</details>
 			</section>

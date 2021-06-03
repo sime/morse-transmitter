@@ -4,6 +4,7 @@
 }
 
 html {
+	font-display: swap;
 	--accent-color: #f5df4d;
 
 	background-color: #141414;
@@ -102,6 +103,25 @@ section > div > *:first-child {
 details[open] summary {
 	color: var(--accent-color);
 }
+details label {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin: 10px;
+}
+input[type="number"] {
+	width: calc(4ch + 2em);
+	background-color: #141414;
+	border-radius: 15px;
+	padding: 1px 15px;
+	text-align: center;
+}
+details {
+	line-height: 100%;
+}
+small {
+	color: #B6B6B6;
+}
 summary {
 	display: block;
 	text-align: center;
@@ -174,7 +194,7 @@ summary {
 }
 
 /* Style focus (Our input[type="checkbox"] is 0 width and 0 height so it's focus styles are not visible to a keyboard user. That's ok though, because we want the label to look like it has the focus anyway.) */
-:focus-visible, :focus-visible + label {
+:focus-visible, :not(summary):focus-visible + label {
 	outline: 1px solid #FFED79;
 	outline-offset: 2px;
 }
@@ -194,13 +214,6 @@ input[type="checkbox"] {
 	margin: 0;
 	width: 0;
 	height: 0;
-}
-input[type="number"] {
-	background-color: #141414;
-	border-radius: 15px;
-	padding: 0 15px;
-}
-input:focus-visible {
 	outline: 0;	
 }
 textarea {
@@ -250,6 +263,9 @@ textarea {
 .transmit svg {
 	fill: #464646;
 }
+.transmit label {
+	border-radius: 50%;
+}
 .transmit input:checked + label svg {
 	fill: var(--accent-color);
 	stroke: black;
@@ -260,15 +276,6 @@ textarea {
 	white-space: pre-wrap;
 	font-family: inherit;
 	word-break: break-word;
-}
-
-#settings label {
-	display: flex;
-	justify-content: space-between;
-	margin: .5em 0;
-}
-#settings input[type="number"] {
-	width: calc(4ch + 2em);
 }
 
 /* Install PWA Section */
