@@ -1,5 +1,5 @@
 // This service worker will never refetch assets once it's installed the first time.  This means that in order for the app to update, the service worker must change and recache the assets.  Changing this verions number will do that.
-const version = "0.5"
+const version = "0.6"
 const static_cache_name = 'static_assets-' + version;
 
 
@@ -12,7 +12,7 @@ self.addEventListener('install', e => e.waitUntil((async () => {
 		'index.html',
 
 		'app.webmanifest',
-		'icons/logo-small.svg', // Needed for the page icon.
+		'icons/logo-opt.svg', // Needed for the page icon.
 
 		'style/index.css',
 		'style/Poppins/Poppins-Regular.ttf',
