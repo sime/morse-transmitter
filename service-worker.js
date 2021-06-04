@@ -12,7 +12,7 @@ self.addEventListener('install', e => e.waitUntil((async () => {
 		'index.html',
 
 		'app.webmanifest',
-		'icons/logo-opt.svg', // Needed for the page icon.
+		'icons/logo-alt-opt.svg', // Needed for the page icon.
 
 		'style/index.css',
 		'style/Poppins/Poppins-Regular.ttf',

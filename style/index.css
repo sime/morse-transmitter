@@ -20,7 +20,6 @@ body {
 main {
 	box-sizing: border-box;
 	width: 100vw;
-	max-width: 1500px;
 	margin: 0 auto;
 	height: 100vh;
 	/* overflow: hidden; */
@@ -50,17 +49,17 @@ h2 {
 
 /* Style the sections */
 section {
-	background-color: #2d2d2d;
+	margin: 15px 15px 0 15px;
 	padding: 14px;
 	border-radius: 10px;
+}
+section:not(#install) {
+	background-color: #2d2d2d;
 }
 
 /* Style the individual sections */
 section#message {
 	grid-area: message;
-}
-section#message, section#encoded {
-	margin: 15px 15px 0 15px;
 }
 section#encoded div {
 	grid-area: code;
@@ -69,15 +68,12 @@ section#encoded div {
 }
 section#settings {
 	grid-area: settings;
-	bottom: 0;
-	margin-top: 14px;
-	border-radius: 20px 20px 0 0;
-	padding: 30px;
+	border-radius: 20px;
+	/* overflow-y: scroll; */
 }
 section#install {
 	color: var(--accent-color);
 	grid-area: install;
-	border-radius: none;
 	text-align: center;
 }
 
@@ -100,6 +96,7 @@ section > div > *:first-child {
 }
 
 /* Style the advanced settings */
+/* TODO(Accessibility): The label for the settings is being applied to the +/- buttons instead of the actual input[type="number"] evern though they are role="presentation". fix. */
 details[open] summary {
 	color: var(--accent-color);
 }
@@ -230,6 +227,9 @@ textarea {
 	max-height: 100%;
 	min-height: 100%;
 }
+textarea::placeholder {
+	color: #797979;
+}
 #screen-flash {
 	z-index: -1;
 	position: fixed;
@@ -293,9 +293,10 @@ textarea {
 /* Tablet / desktop styleing */
 @media(min-width: 850px) {
 	main {
+		max-width: 1040px;
 		grid-template: 
 		"title title" min-content
-		"message settings" 1fr
+		"message settings" min-content
 		"code settings" min-content
 		"install install" min-content / 1fr 1fr;
 		padding: 60px;
@@ -308,11 +309,14 @@ textarea {
 		margin: 20px;
 		border-radius: 10px;
 	}
+	#settings {
+		padding: 35px;
+		border-radius: unset;
+	}
 	#install {
+		/* margin: 100px; */
 		font-size: 25px;
 		background-color: unset;
-	}
-	#settings {
-		border-radius: unset;
+		vertical-align: middle;
 	}
 }
