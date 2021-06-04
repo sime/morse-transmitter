@@ -170,6 +170,7 @@ summary {
 
 /* Style the icons.  (--lightning color is just for the screen flash icon.) */
 .card label svg {
+	margin: 20px 0;
 	stroke: #A0A0A0;
 	flex-grow: 1;
 	--lightning-color: #A0A0A0;
@@ -183,6 +184,7 @@ summary {
 .card input:disabled + label svg {
 	stroke: #5F5F5F;
 	--lightning-color: #5F5F5F;
+	fill: none;
 }
 
 /* Style the label span */
@@ -207,6 +209,9 @@ textarea, input, button {
 	border: unset;
 	background-color: unset;
 	font-size: inherit;
+}
+input[type="checkbox"] + label, button {
+	cursor: pointer;
 }
 input[type="checkbox"] {
 	appearance: none;
@@ -243,10 +248,10 @@ textarea {
 }
 
 /* Style the transmit and repeat section */
-.transmit {
+#transmit {
 	align-items: center;
 }
-.transmit button {
+#transmit button {
 	font-size: 20px;
 	flex-grow: 1;
 	color: #141414;
@@ -254,19 +259,19 @@ textarea {
 	height: 60px;
 	border-radius: 30px;
 }
-.transmit button:hover {
+#transmit button:hover {
 	background-color: #FFED79;
 }
-.transmit button:active {
+#transmit button:active {
 	background-color: #F5DF4D;
 }
-.transmit svg {
+#transmit svg {
 	fill: #464646;
 }
-.transmit label {
+#transmit label {
 	border-radius: 50%;
 }
-.transmit input:checked + label svg {
+#transmit input:checked + label svg {
 	fill: var(--accent-color);
 	stroke: black;
 }
