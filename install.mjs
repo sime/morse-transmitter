@@ -4,7 +4,7 @@ window.addEventListener('beforeinstallprompt', e => {
 
 	const btn = document.querySelector('#install button');
 	btn.addEventListener('click', () => {
-		e.prompt().finally(() => e.style.display = 'none');
+		e.prompt().finally(() => btn.style.display = 'none');
 	});
 
 	btn.style.display = '';
