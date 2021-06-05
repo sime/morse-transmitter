@@ -25,7 +25,16 @@ function get_code() {
 	return code;
 }
 
-export const settings = {};
+export function get_settings() {
+	return {
+		code: get_code(),
+		audio: audio_check.checked,
+		torch: torch_check.checked,
+		screen: screen_check.checked,
+		repeat: repeat_check.checked,
+		dot_time: Number.parseInt(dot_time_number.value)
+	}
+}
 
 // Check if the browser knows about the 'torch' camera capability (Currently just Chrome and Opera)
 if ('mediaDevices' in navigator && navigator.mediaDevices.getSupportedConstraints()['torch']) {
@@ -40,13 +49,11 @@ const setting_defs = [
 	[torch_check, 'torch', localStorage, 'checked'],
 	[screen_check, 'screen', localStorage, 'checked'],
 ];
-for (const [el, key, store, type, kind] of setting_defs) {
+for (const [el, key, store, type] of setting_defs) {
 	const val = store.getItem(key);
 	function store_fn() {
 		store.setItem(key, el[type]);
-		settings[key] = kind ? kind(el[type]) : el[type];
 	}
-	store_fn();
 	if (type === 'value') {
 		el.addEventListener('input', store_fn);
 	} else if (type === 'checked') {
@@ -60,20 +67,18 @@ for (const [el, key, store, type, kind] of setting_defs) {
 }
 
 // Show the code as the user types their message
-message_area.addEventListener('input', co(() => settings.code = code_output.innerText = get_code()));
+message_area.addEventListener('input', co(() => code_output.innerText = get_code()));
 
 // dot-time / wpm settings:
 dot_time_number.addEventListener('input', co(() => {
 	const dot_time = Number.parseInt(dot_time_number.value);
 	localStorage.setItem('dot_time', dot_time);
-	settings.dot_time = dot_time;
 
 	wpm_number.value = 1200 / dot_time;
 }));
 wpm_number.addEventListener('input', () => {
 	const dot_time = 1200 / Number.parseInt(wpm_number.value);
 	localStorage.setItem('dot_time', dot_time);
-	settings.dot_time = dot_time;
 
 	dot_time_number.value = dot_time;
 });

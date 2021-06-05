@@ -1,4 +1,4 @@
-import { transmit_btn, settings } from './elements.mjs';
+import { transmit_btn, get_settings } from './elements.mjs';
 import './install.mjs';
 
 // The fullscreen element that does screen flashing:
@@ -89,6 +89,31 @@ function wait_till(stamp) {
 		else resolve();
 	});
 }
+async function get_torch() {
+	const devices = await navigator.mediaDevices.enumerateDevices();
+	for (const device of devices) {
+		if (device.kind !== 'videoinput') continue;
+
+		const device_stream = await navigator.mediaDevices.getUserMedia({
+			video: { deviceId: device.deviceId }
+		});
+
+		for (const track of device_stream.getVideoTracks()) {
+			// The last method I tried of checking if 'torch' was in the track's settings (which should be all settings supported and not just the settings we've set) didn't work.
+			// New attempt is to just apply the constraint and if the torch constraint isn't supported then we'll get a DOMException saying so.
+			try {
+				await track.applyConstraints({ advanced: [{ torch: false }] });
+				return track;
+			} catch (e) {
+				if (!(e instanceof DOMException)) {
+					// Only catch DOMExceptions
+					throw e;
+				}
+				track.stop();
+			}
+		}
+	}
+}
 
 // Transmitter state machine
 (async () => {
@@ -115,16 +140,23 @@ function wait_till(stamp) {
 
 		// I wish JS had `loop`
 		while (true) {
-			const { code, repeat, audio, flash, screen, dot_time } = settings;
+			const { code, repeat, audio, torch, screen, dot_time } = get_settings();
 
-			if (!audio && !flash && !screen) {
+			if (!audio && !torch && !screen) {
 				alert("Please select at least one transmission type");
 				break;
 			}
 
 			const times = make_times(code, dot_time);
+			let torch_track;
+			if (torch) {
+				torch_track = await get_torch();
+				if (!torch_track) {
+					alert("No camera with a suitable torch found.  Transmission cancelled.");
+					break;
+				}
+			}
 
-			// TODO: make all initialization parallel
 			// Screen
 			if (screen) {
 				if (document.fullscreenElement !== flash_el) {
@@ -147,10 +179,6 @@ function wait_till(stamp) {
 				absn.start();
 			}
 			const start = performance.now();
-			// TODO: Flash initialization
-			if (flash) {
-
-			}
 
 			// Main thread flashing:
 			while (times.length) {
@@ -164,29 +192,35 @@ function wait_till(stamp) {
 				// We only abort during black so that we know that screen / flash are in their off states
 				if (aborted) break;
 
+				// Turn On:
 				if (screen) {
 					flash_el.style.backgroundColor = "white";
 				}
-				// TODO: flash
+				if (torch_track) {
+					torch_track.applyConstraints({ advanced: [{ torch: true }] });
+				}
 
 				t_delay = wait_till(off);
 				// STATE: white; TRANSITIONS: [delay]
 				await t_delay;
 
+				// Turn Off:
 				if (screen) {
 					flash_el.style.backgroundColor = "black";
 				}
-				// TODO: flash
+				if (torch_track) {
+					torch_track.applyConstraints({ advanced: [{ torch: false }] });
+				}
 			}
 
 			if (!repeat || aborted) {
 				// Audio
 				if (absn) absn.stop();
 				// Screen
-				if (document.fullscreenElement == flash_el) {
-					await document.exitFullscreen();
-				}
-				// TODO: Flash
+				if (document.fullscreenElement == flash_el) await document.exitFullscreen();
+				// Flash
+				if (torch_track) torch_track.stop();
+
 				break;
 			}
 		}
