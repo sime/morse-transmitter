@@ -15,6 +15,7 @@
 		<link rel="manifest" href="app.webmanifest">
 
 		<link rel="stylesheet" href="style/index.css">
+		<script type="module" src="js/index.mjs"></script>
 	</head>
 
 	<body>
@@ -71,7 +72,6 @@
 				</div>
 				<div id="transmit">
 					<div>
-
 						<input id="repeat-on" type="checkbox">
 						<label for="repeat-on">
 							<svg stroke="currentcolor" width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
@@ -109,25 +109,26 @@
 						</svg>
 						Advanced Settings
 					</summary>
-					<label>
-						<div>
+					<div>
+						<label for="dot-duration">
 							<div>Dot Duration</div>
 							<small>in milliseconds</small>
-						</div>
+						</label>
+
 						<div>
-							<button role="presentation" tabindex="-1">-</button>
+							<span aria-hidden="true">-</span>
 							<input id="dot-duration" type="number" min="10" max="2000" value="100">
-							<button role="presentation" tabindex="-1">+</button>
+							<span aria-hidden="true">+</span>
 						</div>
-					</label>
-					<label>
-						<span>Words per minute</span>
+					</div>
+					<div>
+						<label for="wpm">Words per minute</label>
 						<div>
-							<button role="presentation" tabindex="-1">-</button>
+							<span aria-hidden="true">-</span>
 							<input id="wpm" type="number" min="1" disabled>
-							<button role="presentation" tabindex="-1">+</button>
+							<span aria-hidden="true">+</span>
 						</div>
-					</label>
+					</div>
 					</div>
 				</details>
 			</section>
@@ -142,27 +143,6 @@
 				</button>
 			</section>
 		</main>
-		<script type="application/javascript">
-			// Get all the settings from local / session storage and apply them to the input elements so that the user can change them.  Then when our module runs and pulls the value from the input, it will show whatever the user has changed while loading.
-			const plain_text = sessionStorage.getItem('plain-text');
-			if (plain_text !== null) {
-				document.querySelector('textarea').innerText = plain_text;
-			}
-
-
-			for (const key of ['audio-on', 'torch-on', 'screen-on', 'repeat-on']) {
-				const stored = localStorage.getItem(key);
-				if (stored !== null) {
-					document.getElementById(key).checked = stored === 'true';
-				}
-			}
-
-			const dd = localStorage.getItem('dot-duration');
-			if (dd !== null) {
-				document.getElementById('dot-duration').value = new Number(dd);
-			}
-		</script>
-		<script type="module" src="index.mjs"></script>
 	</body>
 
 </html>

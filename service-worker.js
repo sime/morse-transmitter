@@ -17,17 +17,10 @@ self.addEventListener('install', e => e.waitUntil((async () => {
 		'style/index.css',
 		'style/Poppins/Poppins-Regular.ttf',
 
-		'cancel.mjs',
-		'index.mjs',
-		'options.mjs',
-		'morse-table.mjs',
-		'modes.mjs',
-
-		'lib/computed.mjs',
-		'lib/context.mjs',
-		'lib/get-or-set.mjs',
-		'lib/index.mjs',
-		'lib/signal.mjs',
+		'js/elements.mjs',
+		'js/index.mjs',
+		'js/install.mjs',
+		'js/morse-table.mjs',
 	]);
 })()));
 

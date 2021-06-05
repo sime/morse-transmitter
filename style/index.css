@@ -100,7 +100,7 @@ section > div > *:first-child {
 details[open] summary {
 	color: var(--accent-color);
 }
-details label {
+details > div {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
