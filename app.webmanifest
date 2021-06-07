@@ -10,6 +10,23 @@
 	"background_color": "#141414",
 	"theme_color": "#f5df4d",
 	"description": "A Morse Code transmitter.  Works offline for remote adventures.",
+	"screenshots": [
+		{
+			"src": "screenshots/iPad.png",
+			"sizes": "2048x1536",
+			"type": "image/png"
+		},
+		{
+			"src": "screenshots/Pixel_2.png",
+			"sizes": "1079x1919",
+			"type": "image/png"
+		},
+		{
+			"src": "screenshots/Pixel_2-settings.png",
+			"sizes": "1079x1919",
+			"type": "image/png"
+		}
+	],
 	"icons": [
 		{
 			"src": "icons/logo-alt-512.png",

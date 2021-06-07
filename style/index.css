@@ -106,12 +106,16 @@ details > div {
 	align-items: center;
 	margin: 10px;
 }
-input[type="number"] {
-	width: calc(4ch + 2em);
+input[type="number"], select {
+	color: inherit;
 	background-color: #141414;
 	border-radius: 15px;
 	padding: 1px 15px;
+	border: unset;
 	text-align: center;
+}
+input[type="number"] {
+	width: calc(4ch + 15px);
 }
 details {
 	line-height: 100%;

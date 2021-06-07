@@ -43,18 +43,16 @@ function wait(target, ev, options = {}) {
 	}));
 }
 // Audio Constants:
-const note_freq = 500;
 const sampleRate = 44100;
-async function render_message(times) {
-	// Now that we have the times, we can create the offline context and schedule the times
-	const actx = new OfflineAudioContext({
+async function render_message(times, waveform, frequency) {
+	const actx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)({
 		sampleRate,
 		length: sampleRate * times[times.length - 1] / 1000,
 		numberOfChannels: 1 // The output is mono-channel
 	});
 	const osc = new OscillatorNode(actx, {
 		frequency: 0,
-		type: 'triangle'
+		type: waveform
 	});
 	osc.connect(actx.destination);
 	osc.start(0);
@@ -64,7 +62,7 @@ async function render_message(times) {
 		const start = times.shift() / 1000;
 		const end = times.shift() / 1000;
 
-		osc.frequency.setValueAtTime(note_freq, start);
+		osc.frequency.setValueAtTime(frequency, start);
 		osc.frequency.setValueAtTime(0, end);
 	}
 
@@ -140,7 +138,13 @@ async function get_torch() {
 
 		// I wish JS had `loop`
 		while (true) {
-			const { code, repeat, audio, torch, screen, dot_time } = get_settings();
+			const {
+				code,
+				repeat,
+				audio, torch, screen,
+				dot_time,
+				waveform, frequency
+			} = get_settings();
 
 			if (!audio && !torch && !screen) {
 				alert("Please select at least one transmission type");
@@ -160,6 +164,7 @@ async function get_torch() {
 			// Screen
 			if (screen) {
 				if (document.fullscreenElement !== flash_el) {
+					// STATE: Init Screen; TRANSITIONS: [fullscreen]
 					if ('requestFullscreen' in flash_el) {
 						await flash_el.requestFullscreen();
 					} else if ('webkitRequestFullscreen' in flash_el) {
@@ -173,8 +178,8 @@ async function get_torch() {
 				absn = new AudioBufferSourceNode(actx);
 				absn.connect(actx.destination);
 
-				// STATE: render_audio; TRANSITIONS: [rendered]
-				const buffer = await render_message(Array.from(times));
+				// STATE: Render Audio; TRANSITIONS: [rendered]
+				const buffer = await render_message(Array.from(times), waveform, frequency);
 				absn.buffer = buffer;
 				absn.start();
 			}
@@ -228,80 +233,3 @@ async function get_torch() {
 		transmit_btn.innerText = "Transmit";
 	}
 })();
-
-/*
-// Handle transmission:
-let abort = false;
-
-
-async function transmit() {
-	const code = encoded();
-	const ot = dot_time();
-	const at = 3 * ot;
-
-	// The transmission can only be cancelled during a delay.
-	function delay(ms = 100) {
-		const start = document.timeline.currentTime || performance.now();
-		return new Promise((resolve, reject) => {
-			function cancel() {
-				clearTimeout(id);
-				reject(new TransmitCancel('Abort Signal'))
-			}
-			function cont() {
-				resolve();
-				abort.signal.removeEventListener('abort', cancel);
-			}
-			const t = Math.max(0, Math.round(start + ms - performance.now()));
-			const id = setTimeout(cont, t);
-			abort.signal.addEventListener('abort', cancel);
-		});
-	}
-
-	try {
-		await init();
-
-		// Wait for 1sec before beginning transmission:
-		await delay(1000);
-
-		do {
-			for (const sym of code) {
-				if (sym == '.') {
-					await on();
-					await delay(ot);
-				} else if (sym == '-') {
-					await on();
-					await delay(at);
-				} else if (sym == ' ') {
-					await off();
-					await delay(ot);
-				} else {
-					console.log("Can't transmit character: ", sym);
-				}
-				await off();
-				await delay(ot);
-			}
-		} while (repeat_on());
-	} catch (e) {
-		// Only catch transmission cancel errors.
-		if (!(e instanceof TransmitCancel)) {
-			throw e;
-		}
-	} finally {
-		await close();
-		abort = false;
-	}
-}
-
-
-const button = document.querySelector('.transmit button');
-button.addEventListener('click', ({ target }) => {
-	if (abort) {
-		abort.abort();
-	} else {
-		abort = new AbortController();
-		target.innerText = "Transmitting...";
-		transmit().finally(() => target.innerText = "Transmit");
-	}
-});
-button.disabled = false;
-*/

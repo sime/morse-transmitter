@@ -10,6 +10,8 @@ const screen_check = document.getElementById('screen-on');
 const code_output = document.getElementById('translated');
 const dot_time_number = document.getElementById('dot-duration');
 const wpm_number = document.getElementById('wpm');
+const waveform_select = document.getElementById('waveform');
+const frequency_number = document.getElementById('frequency');
 
 // Call once helper (Sometimes it's nice to call an event listener once to initialize without having to name it.)
 function co(func) {
@@ -32,7 +34,9 @@ export function get_settings() {
 		torch: torch_check.checked,
 		screen: screen_check.checked,
 		repeat: repeat_check.checked,
-		dot_time: Number.parseInt(dot_time_number.value)
+		dot_time: Number.parseInt(dot_time_number.value),
+		waveform: waveform_select.value,
+		frequency: Number.parseInt(frequency_number.value)
 	}
 }
 
@@ -48,6 +52,8 @@ const setting_defs = [
 	[audio_check, 'audio', localStorage, 'checked'],
 	[torch_check, 'torch', localStorage, 'checked'],
 	[screen_check, 'screen', localStorage, 'checked'],
+	[waveform_select, 'waveform', localStorage, 'value'],
+	[frequency_number, 'frequency', localStorage, 'value']
 ];
 for (const [el, key, store, type] of setting_defs) {
 	const val = store.getItem(key);
@@ -69,7 +75,7 @@ for (const [el, key, store, type] of setting_defs) {
 // Show the code as the user types their message
 message_area.addEventListener('input', co(() => code_output.innerText = get_code()));
 
-// dot-time / wpm settings:
+// dot-time / wpm setting:
 dot_time_number.addEventListener('input', co(() => {
 	const dot_time = Number.parseInt(dot_time_number.value);
 	localStorage.setItem('dot_time', dot_time);
