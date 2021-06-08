@@ -14,6 +14,9 @@ html {
 body {
 	margin: 0;
 }
+#screen-flash {
+	z-index: 1000;
+}
 .blinking main {
 	display: none;
 }
@@ -113,6 +116,11 @@ input[type="number"], select {
 	padding: 1px 15px;
 	border: unset;
 	text-align: center;
+}
+select {
+	-webkit-appearance: none;
+	appearance: none;
+	font-size: inherit;
 }
 input[type="number"] {
 	width: calc(4ch + 15px);
@@ -215,6 +223,7 @@ input[type="checkbox"] + label, button {
 	cursor: pointer;
 }
 input[type="checkbox"] {
+	-webkit-appearance: none;
 	appearance: none;
 	position: absolute;
 	margin: 0;

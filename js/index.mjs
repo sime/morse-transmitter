@@ -1,3 +1,4 @@
+// import './safari-debugging.mjs';
 import { transmit_btn, get_settings } from './elements.mjs';
 import './install.mjs';
 
@@ -45,15 +46,16 @@ function wait(target, ev, options = {}) {
 // Audio Constants:
 const sampleRate = 44100;
 async function render_message(times, waveform, frequency) {
-	const actx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)({
+	// IOS sucks. I hate it.
+	const length = sampleRate * times[times.length - 1] / 1000;
+	const actx = ('OfflineAudioContext' in window) ? new window.OfflineAudioContext({
 		sampleRate,
-		length: sampleRate * times[times.length - 1] / 1000,
+		length,
 		numberOfChannels: 1 // The output is mono-channel
-	});
-	const osc = new OscillatorNode(actx, {
-		frequency: 0,
-		type: waveform
-	});
+	}) : new window.webkitOfflineAudioContext(1, length, sampleRate);
+	const osc = actx.createOscillator();
+	osc.type = waveform;
+	osc.frequency.value = 0;
 	osc.connect(actx.destination);
 	osc.start(0);
 
@@ -66,12 +68,15 @@ async function render_message(times, waveform, frequency) {
 		osc.frequency.setValueAtTime(0, end);
 	}
 
-	return await actx.startRendering();
+	// Can't use the promise version of startRendering because Safari doesn't support it
+	actx.startRendering();
+	return await wait(actx, 'complete').then(({ renderedBuffer }) => renderedBuffer);
 }
 function abort() {
 	return new Promise(resolve => {
 		transmit_btn.addEventListener('click', resolve, { once: true });
 		flash_el.addEventListener('fullscreenchange', flash_handle);
+		flash_el.addEventListener('click', resolve, { once: true });
 		function flash_handle() {
 			if (flash_el !== document.fullscreenElement) {
 				flash_el.removeEventListener('fullscreenchange', flash_handle);
@@ -131,11 +136,6 @@ async function get_torch() {
 		let aborted = false;
 		const t_abort = abort().then(() => aborted = true);
 
-		// Setup the audio context
-		if (!actx) {
-			actx = new (window.AudioContext || webkitAudioContext)();
-		}
-
 		// I wish JS had `loop`
 		while (true) {
 			const {
@@ -152,37 +152,48 @@ async function get_torch() {
 			}
 
 			const times = make_times(code, dot_time);
-			let torch_track;
-			if (torch) {
-				torch_track = await get_torch();
-				if (!torch_track) {
-					alert("No camera with a suitable torch found.  Transmission cancelled.");
-					break;
-				}
-			}
 
-			// Screen
-			if (screen) {
-				if (document.fullscreenElement !== flash_el) {
-					// STATE: Init Screen; TRANSITIONS: [fullscreen]
-					if ('requestFullscreen' in flash_el) {
-						await flash_el.requestFullscreen();
-					} else if ('webkitRequestFullscreen' in flash_el) {
-						await flash_el.webkitRequestFullscreen();
-					}
+			let torch_track, absn, dummy;
+			// Parallelize the initialization calls:
+			const inits = [];
+			if (torch) {
+				inits.push(get_torch().then(v => torch_track = v));
+			}
+			if (screen && document.fullscreenElement !== flash_el) {
+				document.body.classList.add('blinking');
+				if ('requestFullscreen' in flash_el) {
+					inits.push(flash_el.requestFullscreen());
+				} else if ('webkitRequestFullscreen' in flash_el) {
+					inits.push(flash_el.webkitRequestFullscreen());
 				}
 			}
-			// Audio
-			let absn;
 			if (audio) {
-				absn = new AudioBufferSourceNode(actx);
+				// Setup the audio context
+				if (!actx || actx.state == 'closed') {
+					actx = new (window.AudioContext || webkitAudioContext)();
+				} else if (actx.state == 'suspended') {
+					actx.resume();
+				}
+				absn = actx.createBufferSource();
 				absn.connect(actx.destination);
 
-				// STATE: Render Audio; TRANSITIONS: [rendered]
-				const buffer = await render_message(Array.from(times), waveform, frequency);
-				absn.buffer = buffer;
-				absn.start();
+				inits.push(render_message(Array.from(times), waveform, frequency).then(buffer => absn.buffer = buffer));
 			}
+			try {
+				// STATE: Initialization; TRANSITIONS: [success, failed]
+				await Promise.all(inits);
+			} catch (e) {
+				console.error(e);
+				break;
+			}
+
+			if (torch && !torch_track) {
+				alert("No camera with a suitable torch found.  Transmission cancelled.");
+				break;
+			}
+
+			if (dummy) dummy.stop();
+			if (absn) absn.start();
 			const start = performance.now();
 
 			// Main thread flashing:
@@ -202,6 +213,7 @@ async function get_torch() {
 					flash_el.style.backgroundColor = "white";
 				}
 				if (torch_track) {
+					// Technically, applyConstraints returns a promise, but we're not waiting it because we don't want to lose our timing.
 					torch_track.applyConstraints({ advanced: [{ torch: true }] });
 				}
 
@@ -219,12 +231,22 @@ async function get_torch() {
 			}
 
 			if (!repeat || aborted) {
+				document.body.classList.remove('blinking');
+				let closes = [];
 				// Audio
 				if (absn) absn.stop();
+				if (actx && actx.state == 'running') {
+					closes.push(actx.suspend());
+				}
 				// Screen
-				if (document.fullscreenElement == flash_el) await document.exitFullscreen();
+				if (document.fullscreenElement == flash_el) {
+					closes.push(document.exitFullscreen());
+				}
 				// Flash
 				if (torch_track) torch_track.stop();
+
+				// STATE: Closing; TRANSITIONS: [closed]
+				await Promise.all(closes);
 
 				break;
 			}
