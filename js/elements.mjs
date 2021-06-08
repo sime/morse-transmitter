@@ -72,6 +72,11 @@ for (const [el, key, store, type] of setting_defs) {
 	}
 }
 
+// Check if the browser knows about the 'torch' camera capability (Currently just Chrome and Opera)
+if ('mediaDevices' in navigator && navigator.mediaDevices.getSupportedConstraints()['torch']) {
+	torch_check.removeAttribute('disabled');
+}
+
 // Show the code as the user types their message
 message_area.addEventListener('input', co(() => code_output.innerText = get_code()));
 
