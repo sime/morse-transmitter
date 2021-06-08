@@ -31,7 +31,8 @@ main {
 		"title" min-content
 		"message" max-content
 		"code" min-content
-		"settings" 1fr
+		"settings" max-content
+		"blank" 1fr
 		"install" min-content / 1fr;
 	font-size: 16px;
 	z-index: 2;
@@ -99,7 +100,6 @@ section > div > *:first-child {
 }
 
 /* Style the advanced settings */
-/* TODO(Accessibility): The label for the settings is being applied to the +/- buttons instead of the actual input[type="number"] evern though they are role="presentation". fix. */
 details[open] summary {
 	color: var(--accent-color);
 }
@@ -118,8 +118,6 @@ input[type="number"], select {
 	text-align: center;
 }
 select {
-	-webkit-appearance: none;
-	appearance: none;
 	font-size: inherit;
 }
 input[type="number"] {
@@ -151,8 +149,6 @@ summary {
 	padding: 15px;
 	border-radius: 10px;
 	flex-direction: column;
-	/* aspect-ratio: 0.98; */
-	/* max-width: 200px; */
 }
 .card label::after {
 	content: "Off";
@@ -219,12 +215,22 @@ textarea, input, button {
 	background-color: unset;
 	font-size: inherit;
 }
-input[type="checkbox"] + label, button {
+input[type="checkbox"] + label, button, summary, .fake-btn {
 	cursor: pointer;
 }
-input[type="checkbox"] {
+@media(max-width: 350px) {
+	.fake-btn {
+		display: none;
+	}
+}
+input, summary, select, input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
 	-webkit-appearance: none;
 	appearance: none;
+}
+input[type="number"] {
+	-moz-appearance: textfield;
+}
+input[type="checkbox"] {
 	position: absolute;
 	margin: 0;
 	width: 0;
@@ -303,8 +309,8 @@ textarea::placeholder {
 	}
 }
 
-/* Tablet / desktop styleing */
-@media(min-width: 850px) {
+/* Tablet / desktop styling */
+@media(min-width: 900px) {
 	main {
 		max-width: 1040px;
 		grid-template: 

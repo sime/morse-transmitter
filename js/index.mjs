@@ -10,6 +10,10 @@ flash_el.addEventListener('click', () => {
 	}
 });
 
+// This transition occurs when a new service worker claims the page.
+const t_sw_update = new Promise(resolve => {
+	navigator.serviceWorker.addEventListener('controllerchange', resolve);
+});
 // Setup service worker
 if ('serviceWorker' in navigator) {
 	window.addEventListener('load', () => {
@@ -127,8 +131,15 @@ async function get_torch() {
 	while (true) {
 		const t_transmit = wait(transmit_btn, 'click');
 
-		// STATE: Waiting; TRANSITIONS: [transmit]
-		await t_transmit;
+		// STATE: Waiting; TRANSITIONS: [transmit, t_sw_update]
+		let update;
+		await Promise.race([t_transmit, t_sw_update.then(() => update = true)]);
+
+		// Reload the page if the sw has updated:
+		if (update) {
+			location.reload();
+			break;
+		}
 
 		transmit_btn.innerText = "Transmitting...";
 

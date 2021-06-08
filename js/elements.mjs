@@ -96,7 +96,7 @@ wpm_number.addEventListener('input', () => {
 wpm_number.disabled = false;
 
 // Enable the little plus and minus buttons before / after the input[type="number"]
-for (const el of [dot_time_number, wpm_number]) {
+for (const el of [dot_time_number, wpm_number, frequency_number]) {
 	el.previousElementSibling.addEventListener('click', () => {
 		el.value = Number.parseInt(el.value) - 1;
 		el.dispatchEvent(new Event('input'));

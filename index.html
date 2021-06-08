@@ -6,8 +6,8 @@
 		<meta name="description" content="A Morse Code transmitter.  Works offline for remote adventures.">
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<link rel="icon" href="icons/logo-alt-opt.svg" type="image/svg">
-		<link rel="apple-touch-icon" href="icons/logo-alt-apple.png">
+		<link rel="icon" href="icons/logo-opt.svg" type="image/svg">
+		<link rel="apple-touch-icon" href="icons/logo-apple.png">
 		<meta name="theme-color" content="#f5df4d">
 
 		<!-- TODO: If this were hosted on gihub pages, then the base would need to be adjusted to wherever the service worker is located. -->
@@ -117,17 +117,17 @@
 						</label>
 
 						<div>
-							<span aria-hidden="true">-</span>
+							<span class="fake-btn" aria-hidden=" true">-</span>
 							<input id="dot-duration" type="number" min="10" max="2000" value="100">
-							<span aria-hidden="true">+</span>
+							<span class="fake-btn" aria-hidden=" true">+</span>
 						</div>
 					</div>
 					<div>
 						<label for="wpm">Words per minute</label>
 						<div>
-							<span aria-hidden="true">-</span>
+							<span class="fake-btn" aria-hidden="true">-</span>
 							<input id="wpm" type="number" min="1" disabled>
-							<span aria-hidden="true">+</span>
+							<span class="fake-btn aria-hidden=" true">+</span>
 						</div>
 					</div>
 					<div>
@@ -141,7 +141,11 @@
 					</div>
 					<div>
 						<label for="frequency">Audio frequency</label>
-						<input id="frequency" type="number" value="440">
+						<div>
+							<span class="fake-btn" aria-hidden=" true">-</span>
+							<input id="frequency" type="number" value="440">
+							<span class="fake-btn" aria-hidden=" true">+</span>
+						</div>
 					</div>
 				</details>
 			</section>
