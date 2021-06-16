@@ -12,7 +12,11 @@ flash_el.addEventListener('click', () => {
 
 // This transition occurs when a new service worker claims the page.
 const t_sw_update = new Promise(resolve => {
-	navigator.serviceWorker.addEventListener('controllerchange', resolve);
+	let last_controller = navigator.serviceWorker.controller;
+	navigator.serviceWorker.addEventListener('controllerchange', () => {
+		if (last_controller) resolve();
+		last_controller = navigator.serviceWorker.controller;
+	});
 });
 // Setup service worker
 if ('serviceWorker' in navigator) {
