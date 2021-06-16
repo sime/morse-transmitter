@@ -26,6 +26,9 @@
 
 		<link rel="stylesheet" href="style/index.css">
 		<script type="module" src="js/index.mjs"></script>
+		<link rel="modulepreload" type="module" href="js/elements.mjs">
+		<link rel="modulepreload" type="module" href="js/install.mjs">
+		<link rel="modulepreload" type="module" href="js/morse-table.mjs">
 	</head>
 
 	<body>
@@ -134,9 +137,9 @@
 						</label>
 
 						<div>
-							<span class="fake-btn" aria-hidden=" true">-</span>
+							<span class="fake-btn" aria-hidden="true">-</span>
 							<input id="dot-duration" type="number" min="10" max="2000" value="100">
-							<span class="fake-btn" aria-hidden=" true">+</span>
+							<span class="fake-btn" aria-hidden="true">+</span>
 						</div>
 					</div>
 					<div>
@@ -151,9 +154,9 @@
 					<div>
 						<label for="frequency">Audio frequency</label>
 						<div>
-							<span class="fake-btn" aria-hidden=" true">-</span>
+							<span class="fake-btn" aria-hidden="true">-</span>
 							<input id="frequency" type="number" value="440">
-							<span class="fake-btn" aria-hidden=" true">+</span>
+							<span class="fake-btn" aria-hidden="true">+</span>
 						</div>
 					</div>
 				</details>
