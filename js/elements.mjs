@@ -21,8 +21,20 @@ function co(func) {
 
 function get_code() {
 	let code = "";
+	let in_prosign = false;
 	for (const ch of message_area.value) {
-		code += (table[ch.toLowerCase()] ?? ch) + ' ';
+		if (ch == '<') {
+			in_prosign = true
+			continue;
+		} else if (ch == '>') {
+			code += ' ';
+			in_prosign = false;
+			continue;
+		}
+
+		code += (table[ch.toLowerCase()] ?? ch)
+
+		if (!in_prosign) code += ' ';
 	}
 	return code;
 }
