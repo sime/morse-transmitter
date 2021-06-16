@@ -59,17 +59,23 @@ async function render_message(times, waveform, frequency) {
 	}) : new window.webkitOfflineAudioContext(1, length, sampleRate);
 	const osc = actx.createOscillator();
 	osc.type = waveform;
-	osc.frequency.value = 0;
-	osc.connect(actx.destination);
+	osc.frequency.value = frequency;
+	const volume = actx.createGain();
+	volume.gain.value = 0;
+	osc.connect(volume);
+	volume.connect(actx.destination);
 	osc.start(0);
+
+	// We want transitions to take ~4ms: https://developer.mozilla.org/en-US/docs/Web/API/AudioParam/setTargetAtTime#choosing_a_good_timeconstant
+	const timeConstant = 4 / 1000 / 3;
 
 	// Schedule the times:
 	while (times.length) {
 		const start = times.shift() / 1000;
 		const end = times.shift() / 1000;
 
-		osc.frequency.setValueAtTime(frequency, start);
-		osc.frequency.setValueAtTime(0, end);
+		volume.gain.setTargetAtTime(volume.gain.defaultValue, start, timeConstant);
+		volume.gain.setTargetAtTime(0, end, timeConstant);
 	}
 
 	// Can't use the promise version of startRendering because Safari doesn't support it
