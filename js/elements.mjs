@@ -78,7 +78,15 @@ if ('mediaDevices' in navigator && navigator.mediaDevices.getSupportedConstraint
 }
 
 // Show the code as the user types their message
-message_area.addEventListener('input', co(() => code_output.innerText = get_code()));
+message_area.addEventListener('input', co(() => {
+	const code = get_code();
+	code_output.innerText = code;
+	if (code == "") {
+		transmit_btn.disabled = true;
+	} else {
+		transmit_btn.disabled = false;
+	}
+}));
 
 // dot-time / wpm setting:
 dot_time_number.addEventListener('input', co(() => {

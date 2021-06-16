@@ -215,7 +215,7 @@ textarea, input, button {
 	background-color: unset;
 	font-size: inherit;
 }
-input[type="checkbox"] + label, button, summary, .fake-btn {
+input[type="checkbox"]:enabled + label, button:enabled, summary, .fake-btn {
 	cursor: pointer;
 }
 @media(max-width: 350px) {
@@ -278,10 +278,10 @@ textarea::placeholder {
 	height: 60px;
 	border-radius: 30px;
 }
-#transmit button:hover {
+#transmit button:enabled:hover {
 	background-color: #FFED79;
 }
-#transmit button:active {
+#transmit button:enabled:active {
 	background-color: #F5DF4D;
 }
 #transmit svg {
@@ -293,6 +293,10 @@ textarea::placeholder {
 #transmit input:checked + label svg {
 	fill: var(--accent-color);
 	stroke: black;
+}
+#transmit button:disabled {
+	background-color: #363636;
+	color: #5F5F5F;
 }
 
 /* Input / Code Section */

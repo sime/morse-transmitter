@@ -130,145 +130,150 @@ async function get_torch() {
 
 // Transmitter state machine
 (async () => {
-	transmit_btn.disabled = false;
-
 	let actx;
 
 	while (true) {
-		const t_transmit = wait(transmit_btn, 'click');
+		try {
+			const t_transmit = wait(transmit_btn, 'click');
 
-		// STATE: Waiting; TRANSITIONS: [transmit, t_sw_update]
-		let update;
-		await Promise.race([t_transmit, t_sw_update.then(() => update = true)]);
+			// STATE: Waiting; TRANSITIONS: [transmit, t_sw_update]
+			let update;
+			await Promise.race([t_transmit, t_sw_update.then(() => update = true)]);
 
-		// Reload the page if the sw has updated:
-		if (update) {
-			location.reload();
-			break;
+			// Reload the page if the sw has updated:
+			if (update) {
+				location.reload();
+				break;
+			}
+
+			transmit_btn.innerText = "Transmitting...";
+
+			// Handle aborting the transmission
+			let aborted = false;
+			const t_abort = abort().then(() => aborted = true);
+
+			// I wish JS had `loop`
+			while (true) {
+				const {
+					code,
+					repeat,
+					audio, torch, screen,
+					dot_time,
+					waveform, frequency
+				} = get_settings();
+
+				if (!audio && !torch && !screen) {
+					alert("Please select at least one transmission type");
+					break;
+				}
+
+				if (code == "") {
+					break;
+				}
+
+				const times = make_times(code, dot_time);
+
+				let torch_track, absn, dummy;
+				// Parallelize the initialization calls:
+				const inits = [];
+				if (torch) {
+					inits.push(get_torch().then(v => torch_track = v));
+				}
+				if (screen && document.fullscreenElement !== flash_el) {
+					document.body.classList.add('blinking');
+					if ('requestFullscreen' in flash_el) {
+						inits.push(flash_el.requestFullscreen());
+					} else if ('webkitRequestFullscreen' in flash_el) {
+						inits.push(flash_el.webkitRequestFullscreen());
+					}
+				}
+				if (audio) {
+					// Setup the audio context
+					if (!actx || actx.state == 'closed') {
+						actx = new (window.AudioContext || webkitAudioContext)();
+					} else if (actx.state == 'suspended') {
+						actx.resume();
+					}
+					absn = actx.createBufferSource();
+					absn.connect(actx.destination);
+
+					inits.push(render_message(Array.from(times), waveform, frequency).then(buffer => absn.buffer = buffer));
+				}
+				try {
+					// STATE: Initialization; TRANSITIONS: [success, failed]
+					await Promise.all(inits);
+				} catch (e) {
+					console.error(e);
+					break;
+				}
+
+				if (torch && !torch_track) {
+					alert("No camera with a suitable torch found.  Transmission cancelled.");
+					break;
+				}
+
+				if (dummy) dummy.stop();
+				if (absn) absn.start();
+				const start = performance.now();
+
+				// Main thread flashing:
+				while (times.length) {
+					let on = times.shift() + start;
+					let off = times.shift() + start;
+
+					let t_delay = wait_till(on);
+					// STATE: black; TRANSITIONS: [abort, delay]
+					await Promise.race([t_abort, t_delay]);
+
+					// We only abort during black so that we know that screen / flash are in their off states
+					if (aborted) break;
+
+					// Turn On:
+					if (screen) {
+						flash_el.style.backgroundColor = "white";
+					}
+					if (torch_track) {
+						// Technically, applyConstraints returns a promise, but we're not waiting it because we don't want to lose our timing.
+						torch_track.applyConstraints({ advanced: [{ torch: true }] });
+					}
+
+					t_delay = wait_till(off);
+					// STATE: white; TRANSITIONS: [delay]
+					await t_delay;
+
+					// Turn Off:
+					if (screen) {
+						flash_el.style.backgroundColor = "black";
+					}
+					if (torch_track) {
+						torch_track.applyConstraints({ advanced: [{ torch: false }] });
+					}
+				}
+				if (!repeat || aborted) {
+					document.body.classList.remove('blinking');
+					let closes = [];
+					// Audio
+					if (absn) absn.stop();
+					if (actx && actx.state == 'running') {
+						closes.push(actx.suspend());
+					}
+					// Screen
+					if (document.fullscreenElement == flash_el) {
+						closes.push(document.exitFullscreen());
+					}
+					// Flash
+					if (torch_track) torch_track.stop();
+
+					// STATE: Closing; TRANSITIONS: [closed]
+					await Promise.all(closes);
+
+					break;
+				}
+			}
+
+			transmit_btn.innerText = "Transmit";
+		} catch (e) {
+			console.error(e);
 		}
-
-		transmit_btn.innerText = "Transmitting...";
-
-		// Handle aborting the transmission
-		let aborted = false;
-		const t_abort = abort().then(() => aborted = true);
-
-		// I wish JS had `loop`
-		while (true) {
-			const {
-				code,
-				repeat,
-				audio, torch, screen,
-				dot_time,
-				waveform, frequency
-			} = get_settings();
-
-			if (!audio && !torch && !screen) {
-				alert("Please select at least one transmission type");
-				break;
-			}
-
-			const times = make_times(code, dot_time);
-
-			let torch_track, absn, dummy;
-			// Parallelize the initialization calls:
-			const inits = [];
-			if (torch) {
-				inits.push(get_torch().then(v => torch_track = v));
-			}
-			if (screen && document.fullscreenElement !== flash_el) {
-				document.body.classList.add('blinking');
-				if ('requestFullscreen' in flash_el) {
-					inits.push(flash_el.requestFullscreen());
-				} else if ('webkitRequestFullscreen' in flash_el) {
-					inits.push(flash_el.webkitRequestFullscreen());
-				}
-			}
-			if (audio) {
-				// Setup the audio context
-				if (!actx || actx.state == 'closed') {
-					actx = new (window.AudioContext || webkitAudioContext)();
-				} else if (actx.state == 'suspended') {
-					actx.resume();
-				}
-				absn = actx.createBufferSource();
-				absn.connect(actx.destination);
-
-				inits.push(render_message(Array.from(times), waveform, frequency).then(buffer => absn.buffer = buffer));
-			}
-			try {
-				// STATE: Initialization; TRANSITIONS: [success, failed]
-				await Promise.all(inits);
-			} catch (e) {
-				console.error(e);
-				break;
-			}
-
-			if (torch && !torch_track) {
-				alert("No camera with a suitable torch found.  Transmission cancelled.");
-				break;
-			}
-
-			if (dummy) dummy.stop();
-			if (absn) absn.start();
-			const start = performance.now();
-
-			// Main thread flashing:
-			while (times.length) {
-				let on = times.shift() + start;
-				let off = times.shift() + start;
-
-				let t_delay = wait_till(on);
-				// STATE: black; TRANSITIONS: [abort, delay]
-				await Promise.race([t_abort, t_delay]);
-
-				// We only abort during black so that we know that screen / flash are in their off states
-				if (aborted) break;
-
-				// Turn On:
-				if (screen) {
-					flash_el.style.backgroundColor = "white";
-				}
-				if (torch_track) {
-					// Technically, applyConstraints returns a promise, but we're not waiting it because we don't want to lose our timing.
-					torch_track.applyConstraints({ advanced: [{ torch: true }] });
-				}
-
-				t_delay = wait_till(off);
-				// STATE: white; TRANSITIONS: [delay]
-				await t_delay;
-
-				// Turn Off:
-				if (screen) {
-					flash_el.style.backgroundColor = "black";
-				}
-				if (torch_track) {
-					torch_track.applyConstraints({ advanced: [{ torch: false }] });
-				}
-			}
-
-			if (!repeat || aborted) {
-				document.body.classList.remove('blinking');
-				let closes = [];
-				// Audio
-				if (absn) absn.stop();
-				if (actx && actx.state == 'running') {
-					closes.push(actx.suspend());
-				}
-				// Screen
-				if (document.fullscreenElement == flash_el) {
-					closes.push(document.exitFullscreen());
-				}
-				// Flash
-				if (torch_track) torch_track.stop();
-
-				// STATE: Closing; TRANSITIONS: [closed]
-				await Promise.all(closes);
-
-				break;
-			}
-		}
-
-		transmit_btn.innerText = "Transmit";
 	}
 })();
