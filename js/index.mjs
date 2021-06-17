@@ -257,13 +257,15 @@ async function get_torch() {
 					}
 				}
 				if (!repeat || aborted) {
+					// The absn needs to stop before the 100ms delay so that the audio context receives some silence before it is suspended other wise it will click when the audio context is restarted for another transmission.
+					if (absn) absn.stop();
+
 					// STATE: closing delay; TRANSITIONS: [delay]
 					await delay(100);
 
 					document.body.classList.remove('blinking');
 					let closes = [];
 					// Audio
-					if (absn) absn.stop();
 					if (actx && actx.state == 'running') {
 						closes.push(actx.suspend());
 					}
