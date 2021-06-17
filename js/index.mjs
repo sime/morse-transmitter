@@ -55,7 +55,7 @@ function wait(target, ev, options = {}) {
 const sampleRate = 44100;
 async function render_message(times, waveform, frequency) {
 	// IOS sucks. I hate it.
-	const length = sampleRate * times[times.length - 1] / 1000;
+	const length = sampleRate * (times[times.length - 1] + 100) / 1000;
 	const actx = ('OfflineAudioContext' in window) ? new window.OfflineAudioContext({
 		sampleRate,
 		length,
@@ -105,6 +105,9 @@ function wait_till(stamp) {
 		if (diff > 0) setTimeout(resolve, diff);
 		else resolve();
 	});
+}
+function delay(ms) {
+	return new Promise(res => setTimeout(res, ms));
 }
 async function get_torch() {
 	const devices = await navigator.mediaDevices.enumerateDevices();
@@ -254,6 +257,9 @@ async function get_torch() {
 					}
 				}
 				if (!repeat || aborted) {
+					// STATE: closing delay; TRANSITIONS: [delay]
+					await delay(100);
+
 					document.body.classList.remove('blinking');
 					let closes = [];
 					// Audio
