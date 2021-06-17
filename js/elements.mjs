@@ -21,8 +21,20 @@ function co(func) {
 
 function get_code() {
 	let code = "";
+	let in_prosign = false;
 	for (const ch of message_area.value) {
-		code += (table[ch.toLowerCase()] ?? ch) + ' ';
+		if (ch == '<') {
+			in_prosign = true
+			continue;
+		} else if (ch == '>') {
+			code += ' ';
+			in_prosign = false;
+			continue;
+		}
+
+		code += (table[ch.toLowerCase()] ?? ch)
+
+		if (!in_prosign) code += ' ';
 	}
 	return code;
 }
@@ -78,7 +90,15 @@ if ('mediaDevices' in navigator && navigator.mediaDevices.getSupportedConstraint
 }
 
 // Show the code as the user types their message
-message_area.addEventListener('input', co(() => code_output.innerText = get_code()));
+message_area.addEventListener('input', co(() => {
+	const code = get_code();
+	code_output.innerText = code;
+	if (code == "") {
+		transmit_btn.disabled = true;
+	} else {
+		transmit_btn.disabled = false;
+	}
+}));
 
 // dot-time / wpm setting:
 dot_time_number.addEventListener('input', co(() => {
