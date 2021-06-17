@@ -1,5 +1,5 @@
 // This service worker will never refetch assets once it's installed the first time.  This means that in order for the app to update, the service worker must change and recache the assets.  Changing this verions number will do that.
-const version = "0.18"
+const version = "0.19"
 const static_cache_name = 'static_assets-' + version;
 
 
