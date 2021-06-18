@@ -2,6 +2,7 @@ import table from './morse-table.mjs';
 
 // Get elements
 export const transmit_btn = document.querySelector('#transmit button');
+export const sound_output = document.getElementById('sound-output');
 const message_area = document.querySelector('textarea');
 const repeat_check = document.getElementById('repeat-on');
 const audio_check = document.getElementById('audio-on');

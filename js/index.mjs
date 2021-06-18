@@ -1,5 +1,6 @@
 // import './safari-debugging.mjs';
-import { transmit_btn, get_settings } from './elements.mjs';
+import { transmit_btn, sound_output, get_settings } from './elements.mjs';
+import { encode_wav } from './encode_wav.mjs';
 import './install.mjs';
 
 // The fullscreen element that does screen flashing:
@@ -84,8 +85,11 @@ async function render_message(times, waveform, frequency) {
 
 	// Can't use the promise version of startRendering because Safari doesn't support it
 	actx.startRendering();
-	return await wait(actx, 'complete').then(({ renderedBuffer }) => renderedBuffer);
+	const audio_buffer = await wait(actx, 'complete').then(({ renderedBuffer }) => renderedBuffer);
+
+	return encode_wav(audio_buffer);
 }
+
 function abort() {
 	return new Promise(resolve => {
 		transmit_btn.addEventListener('click', resolve, { once: true });
@@ -137,8 +141,6 @@ async function get_torch() {
 
 // Transmitter state machine
 (async () => {
-	let actx;
-
 	while (true) {
 		try {
 			const t_transmit = wait(transmit_btn, 'click');
@@ -180,7 +182,7 @@ async function get_torch() {
 
 				const times = make_times(code, dot_time);
 
-				let torch_track, absn, dummy;
+				let torch_track;
 				// Parallelize the initialization calls:
 				const inits = [];
 				if (torch) {
@@ -195,16 +197,14 @@ async function get_torch() {
 					}
 				}
 				if (audio) {
-					// Setup the audio context
-					if (!actx || actx.state == 'closed') {
-						actx = new (window.AudioContext || webkitAudioContext)();
-					} else if (actx.state == 'suspended') {
-						actx.resume();
-					}
-					absn = actx.createBufferSource();
-					absn.connect(actx.destination);
-
-					inits.push(render_message(Array.from(times), waveform, frequency).then(buffer => absn.buffer = buffer));
+					inits.push(render_message(Array.from(times), waveform, frequency)
+						.then(url => {
+							if (sound_output.src) {
+								URL.revokeObjectURL(sound_output.src);
+							}
+							sound_output.src = url;
+						})
+					);
 				}
 				try {
 					// STATE: Initialization; TRANSITIONS: [success, failed]
@@ -219,8 +219,7 @@ async function get_torch() {
 					break;
 				}
 
-				if (dummy) dummy.stop();
-				if (absn) absn.start();
+				if (audio) sound_output.play();
 				const start = performance.now();
 
 				// Main thread flashing:
@@ -256,19 +255,16 @@ async function get_torch() {
 						torch_track.applyConstraints({ advanced: [{ torch: false }] });
 					}
 				}
-				if (!repeat || aborted) {
-					// The absn needs to stop before the 100ms delay so that the audio context receives some silence before it is suspended other wise it will click when the audio context is restarted for another transmission.
-					if (absn) absn.stop();
+				
+				// STATE: closing delay; TRANSITIONS: [delay]
+				await delay(100);
 
-					// STATE: closing delay; TRANSITIONS: [delay]
-					await delay(100);
+				if (!repeat || aborted) {
+					// Audio
+					sound_output.pause();
 
 					document.body.classList.remove('blinking');
 					let closes = [];
-					// Audio
-					if (actx && actx.state == 'running') {
-						closes.push(actx.suspend());
-					}
 					// Screen
 					if (document.fullscreenElement == flash_el) {
 						closes.push(document.exitFullscreen());
