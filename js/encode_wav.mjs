@@ -49,7 +49,7 @@ export function encode_wav(audio_buffer) {
 	const data = audio_buffer.getChannelData(0);
 	for (const sample of data) {
 		// Sample is a float 32 between -1 and 1, but we want an int16
-		const i16 = Math.trunc(sample * 32768);
+		const i16 = Math.trunc(sample * 32700);
 		encode_i16(i16);
 	}
 

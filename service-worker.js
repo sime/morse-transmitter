@@ -21,8 +21,10 @@ self.addEventListener('install', e => e.waitUntil((async () => {
 		'style/Poppins/Poppins-Regular.ttf',
 
 		'js/elements.mjs',
+		'js/encode_wav.mjs',
 		'js/index.mjs',
 		'js/install.mjs',
+		'js/lib.mjs',
 		'js/morse-table.mjs',
 	]);
 
