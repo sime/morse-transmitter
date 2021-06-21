@@ -1,4 +1,3 @@
-// import './safari-debugging.mjs';
 import { transmit_btn, sound_output, get_settings, torch_check } from './elements.mjs';
 import { encode_wav } from './encode_wav.mjs';
 import { wait_till, stride, wait } from './lib.mjs';
@@ -12,13 +11,27 @@ flash_el.addEventListener('click', () => {
 	}
 });
 
+// Some silence to play between clicking the transmit button and being done rendering the audio.
+const silence = encode_wav({
+	length: 60,
+	sampleRate: 44100,
+	getChannelData() {
+		return (new Array(60)).fill(0.0);
+	}
+})
+
 // This transition occurs when a new service worker claims the page.
 const t_sw_update = new Promise(resolve => {
-	let last_controller = navigator.serviceWorker.controller;
-	navigator.serviceWorker.addEventListener('controllerchange', () => {
-		if (last_controller) resolve();
-		last_controller = navigator.serviceWorker.controller;
-	});
+	// I sometimes use an http dev server
+	if ('serviceWorker' in navigator) {
+		let last_controller = navigator.serviceWorker.controller;
+		navigator.serviceWorker.addEventListener('controllerchange', () => {
+			if (last_controller) resolve();
+			last_controller = navigator.serviceWorker.controller;
+		});
+	} else {
+		console.error("no service worker support.");
+	}
 });
 // Setup service worker
 if ('serviceWorker' in navigator) {
@@ -191,6 +204,9 @@ async function get_torch() {
 							sound_output.src = audio_src;
 						})
 					);
+					// Play some silence while waiting for the song to render.  We need to do this because otherwise the transmit button click won't count as user interaction when we play the audio later on.
+					sound_output.src = silence;
+					sound_output.play().catch(() => {});
 				} else if (!settings.audio && audio_src) {
 					sound_output.pause();
 					URL.revokeObjectURL(audio_src);
@@ -237,7 +253,11 @@ async function get_torch() {
 				
 				if (settings.audio && sound_output.paused) {
 					// STATE: Play; TRANSITIONS: [playing, failed]
-					await sound_output.play();
+					try {
+						await sound_output.play();
+					} catch(e) {
+						console.error(e);
+					}
 				}
 
 				// Main thread flashing:
