@@ -102,6 +102,10 @@ message_area.addEventListener('input', co(() => {
 }));
 
 // dot-time / wpm setting:
+const dt = localStorage.getItem('dot_time');
+if (dt) {
+	dot_time_number.value = Number.parseInt(dt);
+}
 dot_time_number.addEventListener('input', co(() => {
 	const dot_time = Number.parseInt(dot_time_number.value);
 	localStorage.setItem('dot_time', dot_time);
