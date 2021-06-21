@@ -1,6 +1,7 @@
 // import './safari-debugging.mjs';
 import { transmit_btn, sound_output, get_settings, torch_check } from './elements.mjs';
 import { encode_wav } from './encode_wav.mjs';
+import { wait_till, stride, wait } from './lib.mjs';
 import './install.mjs';
 
 // The fullscreen element that does screen flashing:
@@ -27,12 +28,6 @@ if ('serviceWorker' in navigator) {
 }
 
 // Helper functions
-function* stride(arr, stride) {
-	for (let i = 0; i < arr.length; i += stride) {
-		const stop = i + stride;
-		yield arr.slice(i, stop);
-	}
-}
 function make_times(code, dot_time) {
 	// Interleaved start / stop times starting with the first start time, and ending with the duration to remain stopped
 	let times = [];
@@ -54,12 +49,6 @@ function make_times(code, dot_time) {
 	times.push(time); // Closing delay of 100ms
 
 	return times;
-}
-function wait(target, ev, options = {}) {
-	return new Promise(res => target.addEventListener(ev, res, {
-		once: true,
-		...options
-	}));
 }
 // Audio Constants:
 const sampleRate = 44100;
@@ -110,16 +99,6 @@ function abort() {
 			}
 		}
 	});
-}
-function wait_till(stamp) {
-	return new Promise(resolve => {
-		const diff = stamp - performance.now();
-		if (diff > 0) setTimeout(resolve, diff);
-		else resolve();
-	});
-}
-function delay(ms) {
-	return new Promise(res => setTimeout(res, ms));
 }
 async function get_torch() {
 	const devices = await navigator.mediaDevices.enumerateDevices();
