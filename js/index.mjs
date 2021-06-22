@@ -1,5 +1,6 @@
-// import './safari-debugging.mjs';
-import { transmit_btn, get_settings } from './elements.mjs';
+import { transmit_btn, sound_output, get_settings, torch_check } from './elements.mjs';
+import { encode_wav } from './encode_wav.mjs';
+import { wait_till, stride, wait } from './lib.mjs';
 import './install.mjs';
 
 // The fullscreen element that does screen flashing:
@@ -10,13 +11,27 @@ flash_el.addEventListener('click', () => {
 	}
 });
 
+// Some silence to play between clicking the transmit button and being done rendering the audio.
+const silence = encode_wav({
+	length: 60,
+	sampleRate: 44100,
+	getChannelData() {
+		return (new Array(60)).fill(0.0);
+	}
+})
+
 // This transition occurs when a new service worker claims the page.
 const t_sw_update = new Promise(resolve => {
-	let last_controller = navigator.serviceWorker.controller;
-	navigator.serviceWorker.addEventListener('controllerchange', () => {
-		if (last_controller) resolve();
-		last_controller = navigator.serviceWorker.controller;
-	});
+	// I sometimes use an http dev server
+	if ('serviceWorker' in navigator) {
+		let last_controller = navigator.serviceWorker.controller;
+		navigator.serviceWorker.addEventListener('controllerchange', () => {
+			if (last_controller) resolve();
+			last_controller = navigator.serviceWorker.controller;
+		});
+	} else {
+		console.error("no service worker support.");
+	}
 });
 // Setup service worker
 if ('serviceWorker' in navigator) {
@@ -27,7 +42,7 @@ if ('serviceWorker' in navigator) {
 
 // Helper functions
 function make_times(code, dot_time) {
-	// Interleaved start / stop times starting with the first start time
+	// Interleaved start / stop times starting with the first start time, and ending with the duration to remain stopped
 	let times = [];
 
 	let time = 1000; // minimum initial delay of 1sec
@@ -43,19 +58,16 @@ function make_times(code, dot_time) {
 		}
 		time += dot_time;
 	}
+	time += 100;
+	times.push(time); // Closing delay of 100ms
+
 	return times;
-}
-function wait(target, ev, options = {}) {
-	return new Promise(res => target.addEventListener(ev, res, {
-		once: true,
-		...options
-	}));
 }
 // Audio Constants:
 const sampleRate = 44100;
 async function render_message(times, waveform, frequency) {
 	// IOS sucks. I hate it.
-	const length = sampleRate * (times[times.length - 1] + 100) / 1000;
+	const length = sampleRate * (times[times.length - 1]) / 1000;
 	const actx = ('OfflineAudioContext' in window) ? new window.OfflineAudioContext({
 		sampleRate,
 		length,
@@ -74,18 +86,20 @@ async function render_message(times, waveform, frequency) {
 	const timeConstant = 4 / 1000 / 3;
 
 	// Schedule the times:
-	while (times.length) {
-		const start = times.shift() / 1000;
-		const end = times.shift() / 1000;
-
-		volume.gain.setTargetAtTime(volume.gain.defaultValue, start, timeConstant);
-		volume.gain.setTargetAtTime(0, end, timeConstant);
+	for (const [start, end] of stride(times, 2)) {
+		if (end) {
+			volume.gain.setTargetAtTime(volume.gain.defaultValue, start / 1000, timeConstant);
+			volume.gain.setTargetAtTime(0, end / 1000, timeConstant);
+		}
 	}
 
 	// Can't use the promise version of startRendering because Safari doesn't support it
 	actx.startRendering();
-	return await wait(actx, 'complete').then(({ renderedBuffer }) => renderedBuffer);
+	const audio_buffer = await wait(actx, 'complete').then(({ renderedBuffer }) => renderedBuffer);
+
+	return encode_wav(audio_buffer);
 }
+
 function abort() {
 	return new Promise(resolve => {
 		transmit_btn.addEventListener('click', resolve, { once: true });
@@ -98,16 +112,6 @@ function abort() {
 			}
 		}
 	});
-}
-function wait_till(stamp) {
-	return new Promise(resolve => {
-		const diff = stamp - performance.now();
-		if (diff > 0) setTimeout(resolve, diff);
-		else resolve();
-	});
-}
-function delay(ms) {
-	return new Promise(res => setTimeout(res, ms));
 }
 async function get_torch() {
 	const devices = await navigator.mediaDevices.enumerateDevices();
@@ -137,8 +141,6 @@ async function get_torch() {
 
 // Transmitter state machine
 (async () => {
-	let actx;
-
 	while (true) {
 		try {
 			const t_transmit = wait(transmit_btn, 'click');
@@ -160,127 +162,144 @@ async function get_torch() {
 			const t_abort = abort().then(() => aborted = true);
 
 			// I wish JS had `loop`
+			let last_settings;
+			let times, torch_track, audio_src;
 			while (true) {
-				const {
-					code,
-					repeat,
-					audio, torch, screen,
-					dot_time,
-					waveform, frequency
-				} = get_settings();
+				const settings = get_settings();
 
-				if (!audio && !torch && !screen) {
-					alert("Please select at least one transmission type");
-					break;
+				// Close transmission if the message is empty, or if repeat is off and we've already been through, or if we aborted
+				if (settings.code == "" || (!settings.repeat && last_settings) || aborted) {
+					settings.audio = settings.torch = settings.screen = false;
 				}
 
-				if (code == "") {
-					break;
+				// Construct times if needed.
+				if (!times ||
+					settings.code !== last_settings?.code ||
+					settings.dot_time !== last_settings?.dot_time
+				) {
+					times = make_times(settings.code, settings.dot_time);
 				}
 
-				const times = make_times(code, dot_time);
+				// Parallel initialization:
+				let inits = [];
 
-				let torch_track, absn, dummy;
-				// Parallelize the initialization calls:
-				const inits = [];
-				if (torch) {
+				// Get / release the torch_track as needed
+				if (settings.torch && !torch_track) {
 					inits.push(get_torch().then(v => torch_track = v));
+				} else if (!settings.torch && torch_track) {
+					torch_track.stop();
 				}
-				if (screen && document.fullscreenElement !== flash_el) {
+
+				// Create + play / release + stop the audio as needed
+				if (settings.audio && (!audio_src || 
+					settings.code !== last_settings?.code ||
+					settings.dot_time !== last_settings?.dot_time ||
+					settings.waveform !== last_settings?.waveform ||
+					settings.frequency !== last_settings?.frequency
+				)) {
+					sound_output.pause();
+					inits.push(render_message(times, settings.waveform, settings.frequency)
+						.then(url => {
+							audio_src = url;
+							sound_output.src = audio_src;
+						})
+					);
+					// Play some silence while waiting for the song to render.  We need to do this because otherwise the transmit button click won't count as user interaction when we play the audio later on.
+					sound_output.src = silence;
+					sound_output.play().catch(() => {});
+				} else if (!settings.audio && audio_src) {
+					sound_output.pause();
+					URL.revokeObjectURL(audio_src);
+				}
+
+				// Fullscreen / exitFullscreen as needed
+				if (settings.screen && !document.body.classList.contains('blinking')) {
 					document.body.classList.add('blinking');
 					if ('requestFullscreen' in flash_el) {
 						inits.push(flash_el.requestFullscreen());
 					} else if ('webkitRequestFullscreen' in flash_el) {
 						inits.push(flash_el.webkitRequestFullscreen());
 					}
-				}
-				if (audio) {
-					// Setup the audio context
-					if (!actx || actx.state == 'closed') {
-						actx = new (window.AudioContext || webkitAudioContext)();
-					} else if (actx.state == 'suspended') {
-						actx.resume();
+				} else if (!settings.screen && document.body.classList.contains('blinking')) {
+					document.body.classList.remove('blinking');
+					if (document.fullscreenElement == flash_el || document.webkitFullscreenElement == flash_el) {
+						if ('exitFullscreen' in document) {
+							inits.push(document.exitFullscreen());
+						} else if ('webkitExitFullscreen' in document) {
+							inits.push(document.webkitExitFullscreen());
+						}
 					}
-					absn = actx.createBufferSource();
-					absn.connect(actx.destination);
-
-					inits.push(render_message(Array.from(times), waveform, frequency).then(buffer => absn.buffer = buffer));
 				}
-				try {
-					// STATE: Initialization; TRANSITIONS: [success, failed]
-					await Promise.all(inits);
-				} catch (e) {
-					console.error(e);
+
+				if (inits.length) {
+					// STATE: Init; TRANSITIONS: [success, failure]
+					try {
+						await Promise.all(inits);
+					} catch (e) {
+						console.error(e);
+					}
+				}
+
+				// End transmission if there's no ouput types selected (Can happen if none are selected or if we're closing because repeat isn't selected.)
+				if (!settings.audio && !settings.torch && !settings.screen) {
 					break;
 				}
-
-				if (torch && !torch_track) {
+				// End transmission if getting a torch failed
+				if (settings.torch && !torch_track) {
 					alert("No camera with a suitable torch found.  Transmission cancelled.");
+					torch_check.checked = false;
 					break;
 				}
-
-				if (dummy) dummy.stop();
-				if (absn) absn.start();
-				const start = performance.now();
+				
+				if (settings.audio && sound_output.paused) {
+					// STATE: Play; TRANSITIONS: [playing, failed]
+					try {
+						await sound_output.play();
+					} catch(e) {
+						console.error(e);
+					}
+				}
 
 				// Main thread flashing:
-				while (times.length) {
-					let on = times.shift() + start;
-					let off = times.shift() + start;
-
-					let t_delay = wait_till(on);
-					// STATE: black; TRANSITIONS: [abort, delay]
+				const start = performance.now();
+				if (settings.screen || settings.torch) {
+					for (const [on, off] of stride(times, 2)) {
+						let t_delay = wait_till(start + on);
+						// STATE: Off; TRANSITIONS: [abort, delay]
+						await Promise.race([t_abort, t_delay]);
+	
+						// We only abort during Off so that we know that screen / flash are in their off states
+						if (aborted) break;
+	
+						if (off) {
+							// Turn On:
+							if (settings.screen) {
+								flash_el.style.backgroundColor = "white";
+							}
+							if (torch_track) {
+								// Technically, applyConstraints returns a promise, but we're not waiting it because we don't want to lose our timing.
+								torch_track.applyConstraints({ advanced: [{ torch: true }] });
+							}
+		
+							t_delay = wait_till(start + off);
+							// STATE: On; TRANSITIONS: [delay]
+							await t_delay;
+		
+							// Turn Off:
+							if (settings.screen) {
+								flash_el.style.backgroundColor = "black";
+							}
+							if (torch_track) {
+								torch_track.applyConstraints({ advanced: [{ torch: false }] });
+							}
+						}
+					}
+				} else {
+					const t_delay = wait_till(start + times[times.length - 1]);
+					// STATE: Off; TRANSITIONS: [abort, delay]
 					await Promise.race([t_abort, t_delay]);
-
-					// We only abort during black so that we know that screen / flash are in their off states
-					if (aborted) break;
-
-					// Turn On:
-					if (screen) {
-						flash_el.style.backgroundColor = "white";
-					}
-					if (torch_track) {
-						// Technically, applyConstraints returns a promise, but we're not waiting it because we don't want to lose our timing.
-						torch_track.applyConstraints({ advanced: [{ torch: true }] });
-					}
-
-					t_delay = wait_till(off);
-					// STATE: white; TRANSITIONS: [delay]
-					await t_delay;
-
-					// Turn Off:
-					if (screen) {
-						flash_el.style.backgroundColor = "black";
-					}
-					if (torch_track) {
-						torch_track.applyConstraints({ advanced: [{ torch: false }] });
-					}
 				}
-				if (!repeat || aborted) {
-					// The absn needs to stop before the 100ms delay so that the audio context receives some silence before it is suspended other wise it will click when the audio context is restarted for another transmission.
-					if (absn) absn.stop();
-
-					// STATE: closing delay; TRANSITIONS: [delay]
-					await delay(100);
-
-					document.body.classList.remove('blinking');
-					let closes = [];
-					// Audio
-					if (actx && actx.state == 'running') {
-						closes.push(actx.suspend());
-					}
-					// Screen
-					if (document.fullscreenElement == flash_el) {
-						closes.push(document.exitFullscreen());
-					}
-					// Flash
-					if (torch_track) torch_track.stop();
-
-					// STATE: Closing; TRANSITIONS: [closed]
-					await Promise.all(closes);
-
-					break;
-				}
+				last_settings = settings;
 			}
 
 			transmit_btn.innerText = "Transmit";

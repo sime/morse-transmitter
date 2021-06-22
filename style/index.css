@@ -16,6 +16,10 @@ body {
 }
 #screen-flash {
 	z-index: 1000;
+	visibility: hidden;
+}
+.blinking #screen-flash {
+	visibility: visible;
 }
 .blinking main {
 	display: none;

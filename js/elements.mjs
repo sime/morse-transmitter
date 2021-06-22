@@ -2,10 +2,11 @@ import table from './morse-table.mjs';
 
 // Get elements
 export const transmit_btn = document.querySelector('#transmit button');
+export const sound_output = document.getElementById('sound-output');
 const message_area = document.querySelector('textarea');
 const repeat_check = document.getElementById('repeat-on');
 const audio_check = document.getElementById('audio-on');
-const torch_check = document.getElementById('torch-on');
+export const torch_check = document.getElementById('torch-on');
 const screen_check = document.getElementById('screen-on');
 const code_output = document.getElementById('translated');
 const dot_time_number = document.getElementById('dot-duration');
@@ -101,6 +102,10 @@ message_area.addEventListener('input', co(() => {
 }));
 
 // dot-time / wpm setting:
+const dt = localStorage.getItem('dot_time');
+if (dt) {
+	dot_time_number.value = Number.parseInt(dt);
+}
 dot_time_number.addEventListener('input', co(() => {
 	const dot_time = Number.parseInt(dot_time_number.value);
 	localStorage.setItem('dot_time', dot_time);
@@ -126,3 +131,8 @@ for (const el of [dot_time_number, wpm_number, frequency_number]) {
 		el.dispatchEvent(new Event('input'));
 	});
 }
+
+// Sync the repeat checkbox with the loop attribute of the audio tag
+repeat_check.addEventListener('change', co(() => {
+	sound_output.loop = repeat_check.checked;
+}));
