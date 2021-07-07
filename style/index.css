@@ -11,6 +11,10 @@ html {
 	color: white;
 	font-family: "Poppins";
 }
+
+html a {
+	color: white;
+}
 body {
 	margin: 0;
 }
