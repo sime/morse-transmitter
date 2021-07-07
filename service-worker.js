@@ -9,6 +9,7 @@ self.addEventListener('install', e => e.waitUntil((async () => {
 	await static_assets.addAll([
 		// Main page
 		'/',
+		'/?utm_source=homescreen',
 		'index.html',
 
 		'app.webmanifest',
