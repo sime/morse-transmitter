@@ -51,12 +51,13 @@ function make_times(code, dot_time) {
 			times.push(time);
 			time += ((ch == '.') ? 1 : 3) * dot_time;
 			times.push(time);
+			
+			time += dot_time;
 		} else if (ch == ' ') {
-			time += 3 * dot_time;
+			time += 2 * dot_time;
 		} else {
 			console.warn('skipping character: ', ch);
 		}
-		time += dot_time;
 	}
 	time += 100;
 	times.push(time); // Closing delay of 100ms
