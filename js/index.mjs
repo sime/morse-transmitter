@@ -43,6 +43,14 @@ if ('serviceWorker' in navigator) {
 // Helper functions
 function make_times(code, dot_time) {
 	// Interleaved start / stop times starting with the first start time, and ending with the duration to remain stopped
+	// Duration of a dash: 3 * dot_time
+	// Duration of the space between a dot and a dash: 1 * dot_time
+	// Duration of a space between letters: 3 * dot_time
+	// Duration of a space between words: 7 * dot_time
+
+	// 1 space in code == letter space
+	// 3 spaces in code == word space
+
 	let times = [];
 
 	let time = 1000; // minimum initial delay of 1sec
@@ -52,9 +60,12 @@ function make_times(code, dot_time) {
 			time += ((ch == '.') ? 1 : 3) * dot_time;
 			times.push(time);
 			
+			// Always include 1 dot_time of silence after a dot/dash
 			time += dot_time;
 		} else if (ch == ' ') {
+			// Letter spaces: 1 + 2 = 3
 			time += 2 * dot_time;
+			// Word spaces: 1 + (3 * 2) = 7
 		} else {
 			console.warn('skipping character: ', ch);
 		}
