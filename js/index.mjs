@@ -141,11 +141,13 @@ async function get_torch() {
 				await track.applyConstraints({ advanced: [{ torch: false }] });
 				return track;
 			} catch (e) {
-				if (!(e instanceof DOMException)) {
+				track.stop();
+				const is_constraint_error = e instanceof DOMException ||
+					(typeof OverconstrainedError !== 'undefined' && e instanceof OverconstrainedError);
+				if (!is_constraint_error) {
 					// Only catch DOMExceptions
 					throw e;
 				}
-				track.stop();
 			}
 		}
 	}
