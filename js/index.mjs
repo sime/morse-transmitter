@@ -145,7 +145,7 @@ async function get_torch() {
 				const is_constraint_error = e instanceof DOMException ||
 					(typeof OverconstrainedError !== 'undefined' && e instanceof OverconstrainedError);
 				if (!is_constraint_error) {
-					// Only catch DOMExceptions
+					// Only catch OverConstraint errors.
 					throw e;
 				}
 			}
